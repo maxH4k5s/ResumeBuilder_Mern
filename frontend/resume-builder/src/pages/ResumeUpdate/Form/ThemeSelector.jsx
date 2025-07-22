@@ -7,6 +7,15 @@ import {
 import { LuCircleCheckBig } from "react-icons/lu";
 import Tabs from "../../../components/Tabs";
 import TemplateCard from "../../../components/Cards/TemplateCard";
+import RenderResume from "../../../components/ResumeTemplates/RenderResume";
+
+// Create an array from the color palettes
+const colorPalettesArray = Object.entries(themeColorPalette).map(
+  ([name, colors]) => ({
+    name,
+    colors,
+  })
+);
 
 const TAB_DATA = [{ label: "Templates" }, { label: "Color Palettes" }];
 
@@ -54,7 +63,6 @@ const ThemeSelector = ({
     <div className="container mx-auto px-2 md:px-0">
       <div className="flex items-center justify-between mb-5 mt-2">
         <Tabs tabs={TAB_DATA} activeTab={tabValue} setActiveTab={setTabValue} />
-
         <button className="btn-small-light" onClick={handleThemeSelection}>
           <LuCircleCheckBig className="text-[16px]" />
           Done
@@ -62,6 +70,7 @@ const ThemeSelector = ({
       </div>
 
       <div className="grid grid-cols-12 gap-5">
+        {/* Left Column: Templates or Color Palettes */}
         <div className="col-span-12 md:col-span-5 bg-white">
           <div className="grid grid-cols-2 gap-5 max-h-[80vh] overflow-scroll custom-scrollbar md:pr-5">
             {tabValue === "Templates" &&
@@ -75,10 +84,12 @@ const ThemeSelector = ({
                   }
                 />
               ))}
+
             {tabValue === "Color Palettes" &&
-              themeColorPalette.themeOne.map((colors, index) => (
+              colorPalettesArray.map(({ name, colors }, index) => (
                 <ColorPalette
                   key={`palette_${index}`}
+                  name={name} // 👈 Pass name
                   colors={colors}
                   isSelected={selectedColorPalette?.index === index}
                   onSelect={() => setSelectedColorPalette({ colors, index })}
@@ -86,10 +97,19 @@ const ThemeSelector = ({
               ))}
           </div>
         </div>
+
+        {/* Right Column: Resume Preview */}
         <div
           className="col-span-12 md:col-span-7 bg-white -mt-3"
           ref={resumeRef}
-        ></div>
+        >
+          <RenderResume
+            templateId={selectedTemplate?.theme || ""}
+            resumeData={resumeData || EMPTY_RESUME_DATA}
+            containerWidth={baseWidth}
+            colorPalette={selectedColorPalette?.colors || []}
+          />
+        </div>
       </div>
     </div>
   );
@@ -97,21 +117,27 @@ const ThemeSelector = ({
 
 export default ThemeSelector;
 
-const ColorPalette = ({ colors, isSelected, onSelect }) => {
+// ColorPalette Component
+const ColorPalette = ({ name, colors, isSelected, onSelect }) => {
   return (
     <div
-      className={`h-28 bg-purple-50 flex rounded-lg overflow-hidden border-2 ${
-        isSelected ? "border-purple-500" : "border-none"
+      className={`rounded-lg overflow-hidden border-2 cursor-pointer ${
+        isSelected ? "border-purple-500" : "border-gray-200"
       }`}
+      onClick={onSelect}
     >
-      {colors.map((color, index) => (
-        <div
-          key={`color_${index}`}
-          className="flex-1"
-          style={{ backgroundColor: colors[index] }}
-          onClick={onSelect}
-        ></div>
-      ))}
+      <div className="flex h-20">
+        {colors.map((color, index) => (
+          <div
+            key={`color_${index}`}
+            className="flex-1"
+            style={{ backgroundColor: color }}
+          ></div>
+        ))}
+      </div>
+      <p className="text-center text-xs font-medium py-1 text-gray-700">
+        {name}
+      </p>
     </div>
   );
 };
