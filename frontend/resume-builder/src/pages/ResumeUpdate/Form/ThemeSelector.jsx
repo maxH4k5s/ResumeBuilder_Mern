@@ -75,6 +75,15 @@ const ThemeSelector = ({
                   }
                 />
               ))}
+            {tabValue === "Color Palettes" &&
+              themeColorPalette.themeOne.map((colors, index) => (
+                <ColorPalette
+                  key={`palette_${index}`}
+                  colors={colors}
+                  isSelected={selectedColorPalette?.index === index}
+                  onSelect={() => setSelectedColorPalette({ colors, index })}
+                />
+              ))}
           </div>
         </div>
         <div
@@ -87,3 +96,22 @@ const ThemeSelector = ({
 };
 
 export default ThemeSelector;
+
+const ColorPalette = ({ colors, isSelected, onSelect }) => {
+  return (
+    <div
+      className={`h-28 bg-purple-50 flex rounded-lg overflow-hidden border-2 ${
+        isSelected ? "border-purple-500" : "border-none"
+      }`}
+    >
+      {colors.map((color, index) => (
+        <div
+          key={`color_${index}`}
+          className="flex-1"
+          style={{ backgroundColor: colors[index] }}
+          onClick={onSelect}
+        ></div>
+      ))}
+    </div>
+  );
+};
