@@ -1,0 +1,39 @@
+# Node modules
+node_modules/
+frontend/resume-builder/node_modules/
+backend/node_modules/
+
+# Build folders
+build/
+dist/
+frontend/resume-builder/build/
+backend/build/
+
+# Environment files
+.env
+.env.* 
+frontend/resume-builder/.env
+backend/.env
+
+# Log files
+*.log
+logs/
+npm-debug.log*
+
+# IDE/OS-specific files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Test coverage and temp files
+coverage/
+tmp/
+temp/
+*.pid
+.cache/
+
+# Lock files (optional)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
