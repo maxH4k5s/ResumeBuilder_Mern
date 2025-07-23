@@ -8,7 +8,6 @@ import {
   LuUser,
 } from "react-icons/lu";
 import { RiLinkedinLine } from "react-icons/ri";
-// import ContactInfoForm from "../../pages/ResumeUpdate/Form/ContactInfoForm";
 import ContactInfo from "../ResumeSections/ContactInfo";
 import EducationInfo from "../ResumeSections/EducationInfo";
 import { formatYearMonth } from "../../pages/utils/helper";

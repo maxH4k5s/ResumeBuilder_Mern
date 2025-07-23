@@ -32,9 +32,17 @@ const ThemeSelector = ({
     colors: selectedTheme?.colorPalette,
     index: -1,
   });
-  const [selectedTemplate, setSelectedTemplate] = useState({
-    theme: selectedTheme?.theme || "",
-    index: -1,
+
+  const [selectedTemplate, setSelectedTemplate] = useState(() => {
+    if (selectedTheme?.theme) {
+      const index = resumeTemplates.findIndex(
+        (template) => template.theme === selectedTheme.theme
+      );
+      return { theme: selectedTheme.theme, index };
+    }
+
+    // Default to first template (TemplateOne)
+    return { theme: resumeTemplates[0].theme, index: 0 };
   });
 
   const handleThemeSelection = () => {
@@ -50,6 +58,10 @@ const ThemeSelector = ({
       setBaseWidth(resumeRef.current.offsetWidth);
     }
   };
+
+  useEffect(() => {
+    console.log("Template Selected:", selectedTemplate.theme);
+  }, [selectedTemplate]);
 
   useEffect(() => {
     updateBaseWidth();

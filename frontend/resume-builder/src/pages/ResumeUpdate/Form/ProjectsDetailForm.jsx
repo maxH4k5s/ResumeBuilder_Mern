@@ -59,9 +59,9 @@ const ProjectsDetailForm = ({
                 label="Live Demo URL"
                 placeholder="https://yourproject.live"
                 type="url"
-                value={project.github || ""}
+                value={project.liveDemo || ""}
                 onChange={({ target }) =>
-                  updateArrayItem(index, "github", target.value)
+                  updateArrayItem(index, "liveDemo", target.value)
                 }
               />
             </div>
