@@ -9,8 +9,6 @@ const RenderResume = ({
   colorPalette,
   containerWidth,
 }) => {
-  console.log("Rendering Template:", templateId);
-
   switch (templateId) {
     case "01":
       return (

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   EMPTY_RESUME_DATA,
   resumeTemplates,
@@ -30,7 +30,7 @@ const ThemeSelector = ({
   const [tabValue, setTabValue] = useState("Templates");
   const [selectedColorPalette, setSelectedColorPalette] = useState({
     colors: selectedTheme?.colorPalette,
-    index: -1,
+    index: selectedTheme?.theme,
   });
 
   const [selectedTemplate, setSelectedTemplate] = useState(() => {
@@ -53,15 +53,11 @@ const ThemeSelector = ({
     onClose();
   };
 
-  const updateBaseWidth = () => {
+  const updateBaseWidth = useCallback(() => {
     if (resumeRef.current) {
       setBaseWidth(resumeRef.current.offsetWidth);
     }
-  };
-
-  useEffect(() => {
-    console.log("Template Selected:", selectedTemplate.theme);
-  }, [selectedTemplate]);
+  }, []);
 
   useEffect(() => {
     updateBaseWidth();
@@ -69,13 +65,17 @@ const ThemeSelector = ({
     return () => {
       window.removeEventListener("resize", updateBaseWidth);
     };
-  }, []);
+  }, [updateBaseWidth]);
 
   return (
     <div className="container mx-auto px-2 md:px-0">
       <div className="flex items-center justify-between mb-5 mt-2">
         <Tabs tabs={TAB_DATA} activeTab={tabValue} setActiveTab={setTabValue} />
-        <button className="btn-small-light" onClick={handleThemeSelection}>
+        <button
+          className="btn-small-light"
+          onClick={handleThemeSelection}
+          aria-label="Save Theme Selection"
+        >
           <LuCircleCheckBig className="text-[16px]" />
           Done
         </button>
@@ -112,7 +112,7 @@ const ThemeSelector = ({
 
         {/* Right Column: Resume Preview */}
         <div
-          className="col-span-12 md:col-span-7 bg-white -mt-3"
+          className="col-span-12 md:col-span-7 bg-white -mt-3 border border-gray-200 rounded-xl shadow-sm"
           ref={resumeRef}
         >
           <RenderResume
@@ -139,13 +139,15 @@ const ColorPalette = ({ name, colors, isSelected, onSelect }) => {
       onClick={onSelect}
     >
       <div className="flex h-20">
-        {colors.map((color, index) => (
-          <div
-            key={`color_${index}`}
-            className="flex-1"
-            style={{ backgroundColor: color }}
-          ></div>
-        ))}
+        {colors.map((color, index) => {
+          return (
+            <div
+              key={`color_${index}`}
+              className="flex-1"
+              style={{ backgroundColor: color }}
+            />
+          );
+        })}
       </div>
       <p className="text-center text-xs font-medium py-1 text-gray-700">
         {name}

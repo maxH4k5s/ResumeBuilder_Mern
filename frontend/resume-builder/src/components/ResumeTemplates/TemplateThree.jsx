@@ -207,7 +207,7 @@ const TemplateThree = ({ resumeData, colorPalette, containerWidth }) => {
           </div>
 
           <div className="mt-4">
-            <Title text="skills" color={themeColors[1]} />
+            <Title text="Skills" color={themeColors[1]} />
 
             <SkillSection
               skills={resumeData.skills}

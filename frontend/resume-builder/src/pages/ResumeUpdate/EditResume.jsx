@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 import WorkExperienceForm from "./Form/WorkExperienceForm";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import TitleInput from "../../components/inputs/TitleInput";
-import useReactToPrint from "react-to-print";
+import { useReactToPrint } from "react-to-print";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
 import StepProgress from "../../components/StepProgress";
@@ -57,7 +57,7 @@ const EditResume = () => {
     },
     template: {
       theme: "",
-      colorPaletet: "",
+      colorPalette: [],
     },
     contactInfo: {
       email: "",
@@ -459,7 +459,7 @@ const EditResume = () => {
           ...prevState,
           title: resumeInfo?.title || "Untitled",
           template: resumeInfo?.template || prevState?.template,
-          profileInfo: resumeInfo?.profileInfo || prevState?.template,
+          profileInfo: resumeInfo?.profileInfo || prevState?.profileInfo,
           contactInfo: resumeInfo?.contactInfo || prevState?.contactInfo,
           workExperience:
             resumeInfo?.workExperience || prevState?.workExperience,
@@ -471,6 +471,7 @@ const EditResume = () => {
           languages: resumeInfo?.languages || prevState?.languages,
           interests: resumeInfo?.interests || prevState?.interests,
         }));
+        console.log("Loaded resumeData =>", resumeInfo.template);
       }
     } catch (error) {
       console.log("Error fetching resume.", error);
@@ -546,7 +547,7 @@ const EditResume = () => {
   const handleDeleteResume = () => {};
 
   // download resume
-  // const reactToPrintFn = useReactToPrint({ contentRef: resumeDownloadRef });
+  const reactToPrintFn = useReactToPrint({ contentRef: resumeDownloadRef });
 
   // Function to update baseWidth based on the resume container size
   const updateBaseWidth = () => {
@@ -661,7 +662,7 @@ const EditResume = () => {
             <RenderResume
               templateId={resumeData?.template.theme || ""}
               resumeData={resumeData}
-              colorPalette={resumeData?.template?.colorPaletet || []}
+              colorPalette={resumeData?.template?.colorPalette || []}
               containerWidth={baseWidth}
             />
           </div>
@@ -684,6 +685,23 @@ const EditResume = () => {
             }}
             resumeData={null}
             onClose={() => setOpenThemeSelector(false)}
+          />
+        </div>
+      </Modal>
+      <Modal
+        isOpen={openPreviewModal}
+        onClose={() => setOpenPreviewModal(false)}
+        title={resumeData?.title || "Preview & Download"}
+        showActionBtn
+        actionBtnText="Download"
+        actionBtnIcon={<LuDownload className="text-[16px]" />}
+        onActionClick={() => reactToPrintFn()}
+      >
+        <div className="w-[90vw] h-[80vh]" ref={resumeDownloadRef}>
+          <RenderResume
+            templateId={resumeData?.template.theme || ""}
+            resumeData={resumeData}
+            colorPalette={resumeData?.template?.colorPalette || []}
           />
         </div>
       </Modal>

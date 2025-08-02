@@ -33,7 +33,7 @@ const Title = ({ text, color }) => {
 
 const TemplateOne = ({ resumeData, colorPalette, containerWidth }) => {
   const themeColors = colorPalette?.length > 0 ? colorPalette : DEFAULT_THEME;
-
+  console.log("TemplateOne =>", themeColors);
   const resumeRef = useRef(null);
   const [baseWidth, setBaseWidth] = useState(800);
   const [scale, setScale] = useState(1);
