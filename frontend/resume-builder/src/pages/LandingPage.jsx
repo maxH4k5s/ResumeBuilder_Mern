@@ -23,8 +23,8 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="w-full min-h-full bg-white pb-96">
-      <div className="container mx-auto px-4 py-6">
+    <div className="w-full min-h-full bg-white">
+      <div className="container mx-auto px-4 pt-6">
         {/* header */}
         <header className="flex justify-between items-center mb-16">
           <div className="text-xl font-bold">Resume Builder</div>
@@ -41,11 +41,11 @@ const LandingPage = () => {
         </header>
         {/* Hero Content */}
         <div className="flex flex-col md:flex-row items-center">
-          <div className="w-full md:w-1/2 pr-4 mb-8 md:mb-0">
+          <div className="w-full md:w-1/2 pr-4 md:mb-0">
             <h1 className="text-5xl font-bold mb-6 leading-light">
-              Build Your{" "}
+              Your Dream Job Starts with{" "}
               <span className="text-transparent bg-clip-text bg-[radial-gradient(circle,_#7182ff_0%,_#3cff52_100%)] bg-[length:200%_200%] animate-text-shine">
-                Resume Effortlessely
+                A Great Resume
               </span>
             </h1>
             <p className="text-lg text-gray-700 mb-8">

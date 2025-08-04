@@ -23,18 +23,29 @@ connectDB();
 // Middleware
 app.use(express.json());
 
-// Routes
+// Other routes above
 app.use("/api/auth", authRoutes);
 app.use("/api/resume", resumeRoutes);
 
+// Serve uploaded images
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res, path) => {
-      res.set("Access-Control-Allow-Origin", "http://localhost:5173");
+      res.set(
+        "Access-Control-Allow-Origin",
+        "https://resumebuilder-mern-backend.onrender.com/"
+      );
     },
   })
 );
+
+// Serve frontend build
+app.use(express.static(path.join(__dirname, "client/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+});
 
 // Start Server
 const PORT = process.env.PORT || 5000;

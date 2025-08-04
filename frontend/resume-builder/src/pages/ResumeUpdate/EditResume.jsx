@@ -256,7 +256,7 @@ const EditResume = () => {
       // Set progress as percentage
       const percent = Math.round((nextIndex / (pages.length - 1)) * 100);
       setProgress(percent);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -567,7 +567,7 @@ const EditResume = () => {
     return () => {
       window.removeEventListener("resize", updateBaseWidth);
     };
-  }, []);
+  }, [updateBaseWidth]);
 
   return (
     <DashboardLayout>
@@ -612,7 +612,7 @@ const EditResume = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="bg-white rounded-lg border border-purple-100 overflow-hidden">
-            <StepProgress progress={50} />
+            <StepProgress progress={progress} />
             {renderForm()}
 
             <div className="mx-5">
