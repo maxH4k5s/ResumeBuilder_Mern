@@ -31,14 +31,30 @@ app.use("/api/resume", resumeRoutes);
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
-    setHeaders: (res, path) => {
-      res.set(
-        "Access-Control-Allow-Origin",
-        "https://resumebuilder-mern-backend.onrender.com/"
-      );
+    setHeaders: (res, filePath) => {
+      const allowedOrigins = [
+        "http://localhost:5173", // local dev
+        "https://resumebuilder-mern.onrender.com", // production frontend
+      ];
+      const origin = res.req.headers.origin;
+      if (allowedOrigins.includes(origin)) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+      }
     },
   })
 );
+
+res.setHeader("Cache-Control", "public, max-age=86400"); // 1 day
+// Handle 404 errors
+app.use((req, res, next) => {
+  res.status(404).json({ message: "Resource not found" });
+});
+// Handle errors
+app.use((error, req, res, next) => {
+  const statusCode = error.statusCode || 500;
+  const message = error.message || "Internal Server Error";
+  res.status(statusCode).json({ message });
+});
 
 // Serve frontend build
 app.use(express.static(path.join(__dirname, "client/build")));

@@ -567,7 +567,7 @@ const EditResume = () => {
     return () => {
       window.removeEventListener("resize", updateBaseWidth);
     };
-  }, [updateBaseWidth]);
+  }, [resumeId]);
 
   return (
     <DashboardLayout>

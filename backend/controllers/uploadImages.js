@@ -66,7 +66,7 @@ const uploadResumeImage = async (req, res) => {
       }
     );
   } catch (error) {
-    console.log("Error uploading images:", err);
+    console.log("Error uploading images:", error);
     res
       .status(500)
       .json({ message: "Failed to upload images", error: err.images });
