@@ -14,6 +14,7 @@ connectDB();
 // Enable JSON parsing
 app.use(express.json());
 
+app.set("trust proxy", true);
 // CORS config
 app.use(
   cors({

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import Input from "../../components/inputs/Input";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import ProfilePhotoSelector from "../../components/inputs/ProfilePhotoSelector";
 import uploadImage from "../utils/uploadImg";
 import axiosInstance from "../utils/axiosInstance";
