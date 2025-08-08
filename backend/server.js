@@ -23,14 +23,11 @@ app.use(
   })
 );
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/resume", resumeRoutes);
-
 // Serve uploaded images with proper CORS and cache headers
+// Adjusted path to serve from sibling 'uploads' directory
 app.use(
   "/uploads",
-  express.static(path.join(__dirname, "uploads"), {
+  express.static(path.join(__dirname, "../uploads"), {
     setHeaders: (res, filePath) => {
       const allowedOrigins = [
         "http://localhost:5173", // for local dev
@@ -48,11 +45,17 @@ app.use(
   })
 );
 
-// Serve React frontend build (must come before 404)
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/resume", resumeRoutes);
+
+// Serve React frontend build (must come after uploading static)
 app.use(express.static(path.join(__dirname, "client/build")));
 
+// Fallback to React Router support using splat
 app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "client/build", "index.html"));
+});
 });
 
 // Handle 404
