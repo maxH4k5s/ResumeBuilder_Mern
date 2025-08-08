@@ -56,7 +56,6 @@ app.use(express.static(path.join(__dirname, "client/build")));
 app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "client/build", "index.html"));
 });
-});
 
 // Handle 404
 app.use((req, res, next) => {
