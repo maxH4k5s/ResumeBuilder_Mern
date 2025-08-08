@@ -471,7 +471,6 @@ const EditResume = () => {
           languages: resumeInfo?.languages || prevState?.languages,
           interests: resumeInfo?.interests || prevState?.interests,
         }));
-        console.log("Loaded resumeData =>", resumeInfo.template);
       }
     } catch (error) {
       console.log("Error fetching resume.", error);
@@ -544,7 +543,25 @@ const EditResume = () => {
   };
 
   // Delete Resume
-  const handleDeleteResume = () => {};
+  const handleDeleteResume = async (id) => {
+    if (!id) return;
+
+    const confirm = window.confirm(
+      "Are you sure you want to delete this resume?"
+    );
+    if (!confirm) return;
+
+    try {
+      await axiosInstance.delete(`/api/resume/${id}`);
+      toast.success("Resume deleted successfully");
+
+      // Navigate to dashboard or resume list after deletion
+      navigate("/dashboard");
+    } catch (error) {
+      toast.error("Failed to delete resume");
+      console.error(error);
+    }
+  };
 
   // download resume
   const reactToPrintFn = useReactToPrint({ contentRef: resumeDownloadRef });
@@ -594,7 +611,7 @@ const EditResume = () => {
 
             <button
               className="btn-small-light"
-              onClick={() => handleDeleteResume}
+              onClick={() => handleDeleteResume(resumeId)}
             >
               <LuTrash2 className="text-[16px]" />
               <span className="hidden md:block">Delete</span>
