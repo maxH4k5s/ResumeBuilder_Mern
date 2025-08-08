@@ -17,7 +17,7 @@ const Signup = ({ setCurrentPage }) => {
   const [error, setError] = useState(null);
 
   const { updateUser } = useContext(UserContext);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -58,7 +58,7 @@ const Signup = ({ setCurrentPage }) => {
       if (token) {
         localStorage.setItem("token", token);
         updateUser(response.data);
-        navigate("/dashboard");
+        setCurrentPage("login");
       }
     } catch (error) {
       if (error.response && error.response.data.message) {

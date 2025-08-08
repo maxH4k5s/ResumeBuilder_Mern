@@ -81,7 +81,7 @@ const TemplateOne = ({ resumeData, colorPalette, containerWidth }) => {
               )}
             </div>
 
-            <h2 className="text-xl font-bold mt-3">
+            <h2 className="text-xl text-center font-bold mt-3">
               {resumeData.profileInfo.fullName}
             </h2>
             <p className="text-sm text-center">
