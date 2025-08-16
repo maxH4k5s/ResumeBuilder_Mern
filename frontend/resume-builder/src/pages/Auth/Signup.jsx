@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import Input from "../../components/inputs/Input";
-// import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom"; "
 import ProfilePhotoSelector from "../../components/inputs/ProfilePhotoSelector";
 import uploadImage from "../utils/uploadImg";
 import axiosInstance from "../utils/axiosInstance";
@@ -13,6 +13,8 @@ const Signup = ({ setCurrentPage }) => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState(null);
 
@@ -39,6 +41,7 @@ const Signup = ({ setCurrentPage }) => {
     }
 
     setError("");
+    setLoading(true); // Start loading
 
     try {
       if (profilePic) {
@@ -66,6 +69,8 @@ const Signup = ({ setCurrentPage }) => {
       } else {
         setError("Something went wrong. Please try again.");
       }
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -105,8 +110,16 @@ const Signup = ({ setCurrentPage }) => {
         </div>
         {error && <p className="text-red-500 text-xs pb-2.5">{error}</p>}
 
-        <button type="submit" className="btn-primary">
-          SIGN UP
+        <button
+          type="submit"
+          className="btn-primary flex items-center justify-center"
+          disabled={loading}
+        >
+          {loading ? (
+            <span className="spinner"></span> // Show spinner
+          ) : (
+            "SIGN UP"
+          )}
         </button>
 
         <p className="text-[13px] text-slate-800 mt-3">

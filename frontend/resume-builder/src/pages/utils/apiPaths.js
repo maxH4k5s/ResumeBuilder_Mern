@@ -1,22 +1,20 @@
-export const BASE_URL = "https://resumebuilder-mern-backend.onrender.com";
+const BASE_URL = "https://resumebuilder-mern-backend.onrender.com";
 
 export const API_PATHS = {
   AUTH: {
-    REGISTER: "/api/auth/register", //Signup
-    LOGIN: "/api/auth/login", //Authenticate user and return JWT token
-    GET_PROFILE: "/api/auth/profile", //Get logged-in user details
+    REGISTER: `${BASE_URL}/api/auth/register`,
+    LOGIN: `${BASE_URL}/api/auth/login`,
+    GET_PROFILE: `${BASE_URL}/api/auth/profile`,
   },
-
   RESUME: {
-    CREATE: "/api/resume", //POST - Create a new resume
-    GET_ALL: "/api/resume", //GET - Get all resumes of logged-in user
-    GET_BY_ID: (id) => `/api/resume/${id}`, //GET - Get a specific resume
-    UPDATE: (id) => `/api/resume/${id}`, //PUT - Update a resume
-    DELETE: (id) => `/api/resume/${id}`, //DELETE - Delete a resume
-    UPLOAD_IMAGES: (id) => `/api/resume/${id}/upload-images`, //PUT - Upload Thumbnail and Resume profile image
+    CREATE: `${BASE_URL}/api/resume`,
+    GET_ALL: `${BASE_URL}/api/resume`,
+    GET_BY_ID: (id) => `${BASE_URL}/api/resume/${id}`,
+    UPDATE: (id) => `${BASE_URL}/api/resume/${id}`,
+    DELETE: (id) => `${BASE_URL}/api/resume/${id}`,
+    UPLOAD_IMAGES: (id) => `${BASE_URL}/api/resume/${id}/upload-images`,
   },
-
   IMAGE: {
-    UPLOAD_IMAGE: "/api/auth/upload-image",
+    UPLOAD_IMAGE: `${BASE_URL}/api/auth/upload-image`,
   },
 };

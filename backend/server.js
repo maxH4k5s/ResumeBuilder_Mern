@@ -24,15 +24,13 @@ app.use(
   })
 );
 
-// Serve uploaded images with proper CORS and cache headers
-// Adjusted path to serve from sibling 'uploads' directory
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res, filePath) => {
       const allowedOrigins = [
         "http://localhost:5173", // for local dev
-        "https://resumebuilder-mern.onrender.com", // your deployed frontend
+        "https://resumebuilder-mern.onrender.com", // deployed frontend
       ];
       const origin = res.req.headers.origin;
       if (allowedOrigins.includes(origin)) {

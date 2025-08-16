@@ -10,12 +10,14 @@ const Login = ({ setCurrentPage }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
     if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
       return;
@@ -25,7 +27,9 @@ const Login = ({ setCurrentPage }) => {
       setError("Please enter the password");
       return;
     }
+
     setError("");
+    setLoading(true); 
 
     // Login API call
     try {
@@ -47,8 +51,11 @@ const Login = ({ setCurrentPage }) => {
       } else {
         setError("Something went wrong. Please try again.");
       }
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <div className="w-[90vw] md:w-[33vw] p-7 flex flex-col justify-center">
       <h3 className="text-lg font-semibold text-black">Welcome Back</h3>
@@ -61,7 +68,7 @@ const Login = ({ setCurrentPage }) => {
           value={email}
           onChange={({ target }) => setEmail(target.value)}
           label="Email Address"
-          placeholder="joh@example.com"
+          placeholder="john@mail.com"
           type="text"
         />
 
@@ -74,11 +81,17 @@ const Login = ({ setCurrentPage }) => {
         />
 
         {error && <p className="text-red-500 text-xs pb-2.5">{error}</p>}
-        <button type="submit" className="btn-primary">
-          LOGIN
+
+        <button
+          type="submit"
+          className="btn-primary flex items-center justify-center"
+          disabled={loading}
+        >
+          {loading ? <span className="spinner"></span> : "LOGIN"}
         </button>
+
         <p className="text-[13px] text-slate-800 mt-3">
-          Dont have an account?
+          Don't have an account?
           <button
             className="font-medium text-primary underline cursor-pointer"
             onClick={() => setCurrentPage("signup")}
