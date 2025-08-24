@@ -99,7 +99,7 @@ const getUserResumes = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to create resume", error: error.message });
+      .json({ message: "Failed to get all resume", error: error.message });
   }
 };
 
@@ -121,7 +121,7 @@ const getResumeById = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to create resume", error: error.message });
+      .json({ message: "Failed to Get resume", error: error.message });
   }
 };
 
@@ -150,7 +150,7 @@ const updateResume = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Failed to create resume", error: error.message });
+      .json({ message: "Failed to update resume", error: error.message });
   }
 };
 
