@@ -28,13 +28,10 @@ app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res, filePath) => {
-      const allowedOrigins = [
-        "http://localhost:5173", // for local dev
-        "https://resumebuilder-mern.onrender.com", // deployed frontend
-      ];
+      const clientUrl = process.env.CLIENT_URL;
       const origin = res.req.headers.origin;
-      if (allowedOrigins.includes(origin)) {
-        res.setHeader("Access-Control-Allow-Origin", origin);
+      if (origin === clientUrl || !clientUrl || clientUrl === "*") {
+        res.setHeader("Access-Control-Allow-Origin", origin || "*");
         res.setHeader("Access-Control-Allow-Methods", "GET");
         res.setHeader("Access-Control-Allow-Headers", "Content-Type");
         res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
