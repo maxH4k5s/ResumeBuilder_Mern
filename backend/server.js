@@ -45,12 +45,9 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/resume", resumeRoutes);
 
-// Serve React frontend build (must come after uploading static)
-app.use(express.static(path.join(__dirname, "client/build")));
-
-// Fallback to React Router support using splat
-app.get("/*splat", (req, res) => {
-  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+// Basic API Route
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Welcome to Resume Builder API" });
 });
 
 // Handle 404
