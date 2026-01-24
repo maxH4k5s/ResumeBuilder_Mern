@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "https://resumebuilder-mern-backend.onrender.com";
+const BASE_URL = import.meta.env.VITE_API_URL || "https://resume-builder-mern-74qt.vercel.app/";
 
 export const API_PATHS = {
   AUTH: {
