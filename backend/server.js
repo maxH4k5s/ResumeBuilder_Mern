@@ -13,6 +13,8 @@ connectDB();
 
 // Enable JSON parsing
 app.use(express.json());
+// Routes ko express.urlencoded bhi add karein
+app.use(express.urlencoded({ extended: true }));
 
 app.set("trust proxy", true);
 // CORS config
