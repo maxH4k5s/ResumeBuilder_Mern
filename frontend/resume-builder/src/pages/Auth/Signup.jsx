@@ -2,14 +2,14 @@ import React, { useContext, useState } from "react";
 import Input from "../../components/inputs/Input";
 // import { useNavigate } from "react-router-dom"; "
 import ProfilePhotoSelector from "../../components/inputs/ProfilePhotoSelector";
-import uploadImage from "../utils/uploadImg";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
 import { UserContext } from "../../context/userContext";
 import { validateEmail } from "../utils/helper";
 
 const Signup = ({ setCurrentPage }) => {
-  const [profilePic, setProfilePic] = useState(null);
+  const [profilePic, setProfilePic] = useState("");
+  const [preview, setPreview] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,10 +44,8 @@ const Signup = ({ setCurrentPage }) => {
     setLoading(true); // Start loading
 
     try {
-      if (profilePic) {
-        const imgUploadRes = await uploadImage(profilePic);
-        profileImageUrl = imgUploadRes.imageUrl || "";
-      }
+      // If image was uploaded in ProfilePhotoSelector, use the URL directly
+      profileImageUrl = profilePic || "";
 
       const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
         name: fullName,
@@ -81,7 +79,7 @@ const Signup = ({ setCurrentPage }) => {
         Join us today by entering your details below.
       </p>
       <form onSubmit={handleSignup}>
-        <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
+        <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} preview={preview} setPreview={setPreview} />
 
         <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
           <Input

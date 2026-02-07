@@ -30,8 +30,9 @@ const ProfilePhotoSelector = ({ image, setImage, preview, setPreview }) => {
         );
 
         // Use the hosted URL from the response
-        const uploadedImageUrl = response.data.url;
+        const uploadedImageUrl = response.data.imageUrl;
         setPreview(uploadedImageUrl); // Update the preview with the hosted URL
+        setImage(uploadedImageUrl); // Store the uploaded URL
         setUploading(false); // Stop uploading
       } catch (error) {
         console.error("Image upload failed:", error);
