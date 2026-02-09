@@ -40,6 +40,11 @@ const Signup = ({ setCurrentPage }) => {
       return;
     }
 
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+
     setError("");
     setLoading(true); // Start loading
 

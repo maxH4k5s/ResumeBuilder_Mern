@@ -41,11 +41,18 @@ const UserProvider = ({ children }) => {
     fetchUser();
   }, [token]);
 
-  // Called after successful login
-  const updateUser = ({ user: userData, token: accessToken }) => {
+  // Called after successful login (handles backend response format)
+  const updateUser = (data) => {
+    // Handle backend response format: { _id, name, email, profileImageUrl, token }
+    const userData = {
+      _id: data._id,
+      name: data.name,
+      email: data.email,
+      profileImageUrl: data.profileImageUrl,
+    };
     setUser(userData);
-    setToken(accessToken);
-    localStorage.setItem("token", accessToken);
+    setToken(data.token);
+    localStorage.setItem("token", data.token);
   };
 
   // Clear user data on logout or error

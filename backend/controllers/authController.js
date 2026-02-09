@@ -7,12 +7,31 @@ const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
+// Basic email validator
+const validateEmail = (email) => {
+  const re = /^\S+@\S+\.\S+$/;
+  return re.test(String(email).toLowerCase());
+};
+
 // @desc Register a new user
 // @route POST /api/auth/register
 // @access Public
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, profileImageUrl } = req.body;
+
+    // Basic validation
+    if (!name) {
+      return res.status(400).json({ message: "Name is required." });
+    }
+
+    if (!email || !validateEmail(email)) {
+      return res.status(400).json({ message: "Please provide a valid email address." });
+    }
+
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long." });
+    }
 
     // check if user already exists
     const userExists = await User.findOne({ email });
@@ -51,15 +70,24 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Basic validation for login
+    if (!email || !validateEmail(email)) {
+      return res.status(400).json({ message: "Please provide a valid email address." });
+    }
+
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long." });
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(500).json({ message: "Invalid email or password." });
+      return res.status(401).json({ message: "Invalid email or password." });
     }
 
     // Compare Password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(500).json({ message: "Invalid email or password." });
+      return res.status(401).json({ message: "Invalid email or password." });
     }
 
     // Return User data with jwt
@@ -82,7 +110,7 @@ const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
     if (!user) {
-      res.status(404).json({ message: "Usr not founde" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.json(user);
