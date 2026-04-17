@@ -14,7 +14,7 @@ const extractBaseUrl = (url) => {
 
 const axiosInstance = axios.create({
   baseURL: extractBaseUrl(API_PATHS.AUTH.LOGIN), // derive from LOGIN URL
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -30,7 +30,7 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response Interceptor
@@ -47,7 +47,7 @@ axiosInstance.interceptors.response.use(
       console.error("Request timeout. Please try again");
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;
