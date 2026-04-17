@@ -23,7 +23,7 @@ app.use(
     origin: process.env.CLIENT_URL || "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 app.use(
@@ -40,7 +40,7 @@ app.use(
         res.setHeader("Cache-Control", "public, max-age=86400"); // cache for 1 day
       }
     },
-  })
+  }),
 );
 
 // Routes
@@ -50,6 +50,21 @@ app.use("/api/resume", resumeRoutes);
 // Basic API Route
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Welcome to Resume Builder API" });
+});
+
+// Temporary debug route — verify Cloudinary env vars on Render
+app.get("/api/debug-cloudinary", (req, res) => {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  res.json({
+    CLOUDINARY_CLOUD_NAME: cloudName ? `"${cloudName}" ✅` : "❌ MISSING",
+    CLOUDINARY_API_KEY: apiKey ? `"${apiKey}" ✅` : "❌ MISSING",
+    CLOUDINARY_API_SECRET: apiSecret
+      ? `set (${apiSecret.length} chars) ✅`
+      : "❌ MISSING",
+  });
 });
 
 // Handle 404
