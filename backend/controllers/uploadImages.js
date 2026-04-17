@@ -8,9 +8,12 @@ const uploadResumeImage = async (req, res) => {
       res,
       async (err) => {
         if (err) {
-          return res
-            .status(400)
-            .json({ message: "File upload failed", error: err.message });
+          console.error("[uploadResumeImage] Multer/Cloudinary error:", err); // logs full error to Render
+          return res.status(400).json({
+            message: "File upload failed",
+            error: err.message,
+            code: err.http_code || err.code,
+          });
         }
 
         const resumeId = req.params.id;
@@ -44,10 +47,10 @@ const uploadResumeImage = async (req, res) => {
           thumbnailLink: resume.thumbnailLink,
           profilePreviewUrl: resume.profileInfo.profilePreviewUrl,
         });
-      }
+      },
     );
   } catch (error) {
-    console.log("Error uploading images:", error);
+    console.error("[uploadResumeImage] Unexpected error:", error);
     res
       .status(500)
       .json({ message: "Failed to upload images", error: error.message });

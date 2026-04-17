@@ -16,7 +16,8 @@ const axiosInstance = axios.create({
   baseURL: extractBaseUrl(API_PATHS.AUTH.LOGIN), // derive from LOGIN URL
   timeout: 30000,
   headers: {
-    "Content-Type": "application/json",
+    // NOTE: Do NOT set Content-Type here globally.
+    // For JSON requests it's set per-call; for FormData, Axios sets it automatically.
     Accept: "application/json",
   },
 });
@@ -28,6 +29,13 @@ axiosInstance.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+
+    // Only set Content-Type for non-FormData requests
+    // FormData lets Axios auto-set "multipart/form-data; boundary=..." correctly
+    if (!(config.data instanceof FormData)) {
+      config.headers["Content-Type"] = "application/json";
+    }
+
     return config;
   },
   (error) => Promise.reject(error),

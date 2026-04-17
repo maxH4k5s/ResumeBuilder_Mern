@@ -497,10 +497,11 @@ const EditResume = () => {
       if (profileImageFile) formData.append("profileImage", profileImageFile);
       if (thumbnailFile) formData.append("thumbnail", thumbnailFile);
 
+      // NOTE: Do NOT set Content-Type manually for FormData.
+      // Axios will auto-set "multipart/form-data; boundary=..." correctly.
       const uploadResponse = await axiosInstance.put(
         API_PATHS.RESUME.UPLOAD_IMAGES(resumeId),
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        formData
       );
 
       const { thumbnailLink, profilePreviewUrl } = uploadResponse.data;
