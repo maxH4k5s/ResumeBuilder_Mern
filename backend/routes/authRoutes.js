@@ -14,13 +14,22 @@ router.post("/register", registerUser); // Register User
 router.post("/login", loginUser); // Login User
 router.get("/profile", protect, getUserProfile); // Get User Profile
 
-router.post("/upload-image", upload.single("image"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
+router.post("/upload-image", (req, res) => {
+  upload.single("image")(req, res, (err) => {
+    if (err) {
+      console.error("[upload-image] Multer/Cloudinary error:", err);
+      return res
+        .status(400)
+        .json({ message: "File upload failed", error: err.message });
+    }
 
-  const imageUrl = req.file.path; // Cloudinary URL
-  res.status(200).json({ imageUrl });
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const imageUrl = req.file.path; // Cloudinary URL
+    res.status(200).json({ imageUrl });
+  });
 });
 
 module.exports = router;

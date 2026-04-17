@@ -7,14 +7,11 @@ const uploadImage = async (imageFile) => {
   formData.append("image", imageFile);
 
   try {
+    // NOTE: Do NOT set Content-Type manually — Axios auto-sets
+    // "multipart/form-data; boundary=..." correctly when FormData is passed.
     const response = await axiosInstance.post(
       API_PATHS.IMAGE.UPLOAD_IMAGE,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data", //set headers for file upload
-        },
-      }
+      formData
     );
 
     return response.data; //return response data
