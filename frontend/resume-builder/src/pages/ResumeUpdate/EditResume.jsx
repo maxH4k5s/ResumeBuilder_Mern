@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   LuArrowLeft,
@@ -31,6 +31,55 @@ import {
 } from "../utils/helper";
 import ThemeSelector from "./Form/ThemeSelector";
 import Modal from "../../components/Modal";
+import { EMPTY_RESUME_DATA } from "../utils/data";
+
+// Returns real value if non-empty, otherwise falls back to dummy placeholder
+const preferReal = (real, dummy) => {
+  if (real === null || real === undefined) return dummy;
+  if (typeof real === "string") return real.trim() ? real : dummy;
+  return real;
+};
+
+// Returns real array if any item has meaningful data (ignoring _id), otherwise dummy array
+const arrayHasData = (arr) =>
+  Array.isArray(arr) &&
+  arr.some((item) =>
+    typeof item === "string"
+      ? item.trim()
+      : Object.entries(item).some(([k, v]) => k !== "_id" && v && String(v).trim())
+  );
+
+// Merges real resume data with EMPTY_RESUME_DATA placeholders
+const getPreviewData = (real, dummy) => ({
+  ...real,
+  profileInfo: {
+    profilePreviewUrl: real?.profileInfo?.profilePreviewUrl || "",
+    profileImg: real?.profileInfo?.profileImg || "",
+    fullName: preferReal(real?.profileInfo?.fullName, dummy.profileInfo.fullName),
+    designation: preferReal(real?.profileInfo?.designation, dummy.profileInfo.designation),
+    summary: preferReal(real?.profileInfo?.summary, dummy.profileInfo.summary),
+  },
+  contactInfo: {
+    email: preferReal(real?.contactInfo?.email, dummy.contactInfo.email),
+    phone: preferReal(real?.contactInfo?.phone, dummy.contactInfo.phone),
+    location: preferReal(real?.contactInfo?.location, dummy.contactInfo.location),
+    linkedin: preferReal(real?.contactInfo?.linkedin, dummy.contactInfo.linkedin),
+    github: preferReal(real?.contactInfo?.github, dummy.contactInfo.github),
+    website: preferReal(real?.contactInfo?.website, dummy.contactInfo.website),
+  },
+  workExperience: arrayHasData(real?.workExperience)
+    ? real.workExperience
+    : dummy.workExperience,
+  education: arrayHasData(real?.education) ? real.education : dummy.education,
+  skills: arrayHasData(real?.skills) ? real.skills : dummy.skills,
+  projects: arrayHasData(real?.projects) ? real.projects : dummy.projects,
+  certifications: arrayHasData(real?.certifications)
+    ? real.certifications
+    : dummy.certifications,
+  languages: arrayHasData(real?.languages) ? real.languages : dummy.languages,
+  interests: arrayHasData(real?.interests) ? real.interests : dummy.interests,
+});
+
 
 const EditResume = () => {
   const { resumeId } = useParams();
@@ -115,6 +164,13 @@ const EditResume = () => {
 
   const [errorMsg, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Merge real data with EMPTY_RESUME_DATA placeholders for preview
+  const previewData = useMemo(
+    () => getPreviewData(resumeData, EMPTY_RESUME_DATA),
+    [resumeData]
+  );
+
 
   // Validate Inputs
   const validateAndNext = () => {
@@ -490,26 +546,35 @@ const EditResume = () => {
         `resume-${resumeId}.png`
       );
 
-      const profileImageFile = resumeData?.profileInfo?.profileImg || null;
+      const profileImageField = resumeData?.profileInfo?.profileImg || null;
+
+      // Check if profileImg is already a Cloudinary URL (pre-uploaded by ProfilePhotoSelector)
+      // or an actual File object that still needs to be uploaded
+      const isAlreadyUploaded =
+        typeof profileImageField === "string" && profileImageField.startsWith("http");
 
       const formData = new FormData();
-
-      if (profileImageFile) formData.append("profileImage", profileImageFile);
       if (thumbnailFile) formData.append("thumbnail", thumbnailFile);
 
-      // NOTE: Do NOT set Content-Type manually for FormData.
-      // Axios will auto-set "multipart/form-data; boundary=..." correctly.
+      // Only send profileImage via multer if it's an actual File (not a URL)
+      if (profileImageField instanceof File) {
+        formData.append("profileImage", profileImageField);
+      }
+
       const uploadResponse = await axiosInstance.put(
         API_PATHS.RESUME.UPLOAD_IMAGES(resumeId),
         formData
       );
 
-      const { thumbnailLink, profilePreviewUrl } = uploadResponse.data;
+      const { thumbnailLink, profilePreviewUrl: uploadedProfileUrl } =
+        uploadResponse.data;
 
-      console.log("RESUME_DATA__", resumeData);
+      // Use pre-uploaded URL directly if multer didn't receive a file
+      const finalProfilePreviewUrl =
+        uploadedProfileUrl || (isAlreadyUploaded ? profileImageField : "");
 
       // Call the second API to update other resume data
-      await updateResumeDetails(thumbnailLink, profilePreviewUrl);
+      await updateResumeDetails(thumbnailLink, finalProfilePreviewUrl);
 
       toast.success("Resume Updated Successfully");
       navigate("/dashboard");
@@ -520,6 +585,7 @@ const EditResume = () => {
       setIsLoading(false);
     }
   };
+
 
   const updateResumeDetails = async (thumbnailLink, profilePreviewUrl) => {
     try {
@@ -676,10 +742,10 @@ const EditResume = () => {
             </div>
           </div>
           <div ref={resumeRef} className="h-[100vh]">
-            {/* Resume Template */}
+            {/* Resume Template — shows dummy data wherever fields are still empty */}
             <RenderResume
-              templateId={resumeData?.template.theme || ""}
-              resumeData={resumeData}
+              templateId={previewData?.template?.theme || resumeData?.template?.theme || ""}
+              resumeData={previewData}
               colorPalette={resumeData?.template?.colorPalette || []}
               containerWidth={baseWidth}
             />

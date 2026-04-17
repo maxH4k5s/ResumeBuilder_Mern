@@ -93,11 +93,19 @@ export const fixTailwindColors = (element) => {
   });
 };
 
-// convert component to image
+// convert component to image — captures full scrollable content, not just visible area
 export async function captureElementAsImage(element) {
   if (!element) throw new Error("No element provided");
 
-  const canvas = await html2canvas(element);
+  const canvas = await html2canvas(element, {
+    scrollX: 0,
+    scrollY: 0,
+    width: element.scrollWidth,
+    height: element.scrollHeight,
+    windowWidth: element.scrollWidth,
+    windowHeight: element.scrollHeight,
+    useCORS: true,
+  });
   return canvas.toDataURL("image/png");
 }
 

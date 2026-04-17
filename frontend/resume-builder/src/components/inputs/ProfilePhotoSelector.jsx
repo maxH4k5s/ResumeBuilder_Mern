@@ -21,12 +21,7 @@ const ProfilePhotoSelector = ({ image, setImage, preview, setPreview }) => {
 
         const response = await axiosInstance.post(
           API_PATHS.IMAGE.UPLOAD_IMAGE,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
+          formData
         );
 
         // Use the hosted URL from the response

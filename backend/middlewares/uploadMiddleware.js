@@ -6,7 +6,7 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "resume-builder", // Folder name in Cloudinary
-    allowed_formats: ["jpg", "png", "jpeg"], // Allowed formats
+    allowed_formats: ["jpg", "png", "jpeg", "webp", "avif"], // Allowed formats
   },
 });
 

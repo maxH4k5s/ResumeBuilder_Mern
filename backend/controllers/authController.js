@@ -26,11 +26,15 @@ const registerUser = async (req, res) => {
     }
 
     if (!email || !validateEmail(email)) {
-      return res.status(400).json({ message: "Please provide a valid email address." });
+      return res
+        .status(400)
+        .json({ message: "Please provide a valid email address." });
     }
 
     if (!password || password.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters long." });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 8 characters long." });
     }
 
     // check if user already exists
@@ -72,11 +76,15 @@ const loginUser = async (req, res) => {
 
     // Basic validation for login
     if (!email || !validateEmail(email)) {
-      return res.status(400).json({ message: "Please provide a valid email address." });
+      return res
+        .status(400)
+        .json({ message: "Please provide a valid email address." });
     }
 
     if (!password || password.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters long." });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 8 characters long." });
     }
 
     const user = await User.findOne({ email });
@@ -119,4 +127,87 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile };
+// @desc Update user profile (name, profileImageUrl)
+// @route PUT /api/auth/profile
+// @access Private
+const updateProfile = async (req, res) => {
+  try {
+    const { name, profileImageUrl } = req.body;
+
+    console.log("[updateProfile] Received body:", { name, profileImageUrl });
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: "Name is required." });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { name: name.trim(), profileImageUrl: profileImageUrl || null },
+      { new: true },
+    );
+
+    console.log("[updateProfile] Saved to DB:", {
+      name: user.name,
+      profileImageUrl: user.profileImageUrl,
+    });
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      profileImageUrl: user.profileImageUrl,
+    });
+  } catch (error) {
+    console.error("[updateProfile] Error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// @desc Update user password
+// @route PUT /api/auth/update-password
+// @access Private
+const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Both current and new password are required." });
+    }
+
+    if (newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({ message: "New password must be at least 8 characters." });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ message: "Current password is incorrect." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ message: "Password updated successfully." });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  getUserProfile,
+  updateProfile,
+  updatePassword,
+};

@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Home/Dashboard";
 import EditResume from "./pages/ResumeUpdate/EditResume";
+import ProfileSettings from "./pages/ProfileSettings/ProfileSettings";
 import UserProvider from "./context/userContext";
 
 const App = () => {
@@ -15,6 +16,7 @@ const App = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/resume/:resumeId" element={<EditResume />} />
+            <Route path="/profile-settings" element={<ProfileSettings />} />
           </Routes>
         </Router>
       </div>

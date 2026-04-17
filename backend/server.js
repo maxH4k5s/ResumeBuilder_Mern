@@ -74,9 +74,11 @@ app.use((req, res, next) => {
 
 // Global error handler
 app.use((error, req, res, next) => {
-  const statusCode = error.statusCode || 500;
+  console.error("[GlobalErrorHandler]", error.message, error.http_code || "");
+  console.error(error.stack || error);
+  const statusCode = error.statusCode || error.http_code || 500;
   const message = error.message || "Internal Server Error";
-  res.status(statusCode).json({ message });
+  res.status(statusCode).json({ message, error: error.message });
 });
 
 // Start server

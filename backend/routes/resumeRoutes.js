@@ -9,13 +9,21 @@ const {
 } = require("../controllers/resumeController");
 const { protect } = require("../middlewares/authMiddleware");
 const { uploadResumeImage } = require("../controllers/uploadImages");
+const upload = require("../middlewares/uploadMiddleware");
 
 const router = express.Router();
 router.post("/", protect, createResume); //Create Resume
 router.get("/", protect, getUserResumes); //get Resume
 router.get("/:id", protect, getResumeById); //get Resume by id
 router.put("/:id", protect, updateResume); //Update Resume
-router.put("/:id/upload-images", protect, uploadResumeImage);
+
+// upload middleware runs FIRST (parses multipart), then protect, then controller
+router.put(
+  "/:id/upload-images",
+  upload.fields([{ name: "thumbnail" }, { name: "profileImage" }]),
+  protect,
+  uploadResumeImage
+);
 
 router.delete("/:id", protect, deleteResume); //delete resume
 

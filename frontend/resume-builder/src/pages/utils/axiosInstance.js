@@ -47,7 +47,10 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response) {
       if (error.response.status === 401) {
-        window.location.href = "/";
+        // If the error is from the login endpoint, let the component handle it (so it can show the error message)
+        if (!error.config || !error.config.url.includes("login")) {
+          window.location.href = "/";
+        }
       } else if (error.response.status === 500) {
         console.error("Server error. Please try again later.");
       }

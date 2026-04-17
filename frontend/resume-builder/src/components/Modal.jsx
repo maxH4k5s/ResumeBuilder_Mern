@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 
 const Modal = ({
   children,
@@ -12,10 +13,11 @@ const Modal = ({
   onActionClick,
 }) => {
   if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black/40">
+
+  const modalContent = (
+    <div className="fixed inset-0 z-[100] flex justify-center items-center w-full h-full bg-black/40">
       <div
-        className={`relative flex flex-col bg-white shadow-lg rounded-lg overflow-hidden`}
+        className={`relative flex flex-col bg-white shadow-lg rounded-lg overflow-hidden w-[90%] max-w-md md:max-w-lg lg:max-w-xl mx-auto`}
       >
         {!hideHeader && (
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -61,6 +63,9 @@ const Modal = ({
       </div>
     </div>
   );
+
+  // Render using portal to escape parent stacking contexts (e.g. backdrop-blur)
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default Modal;

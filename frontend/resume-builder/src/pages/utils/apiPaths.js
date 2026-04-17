@@ -5,6 +5,8 @@ export const API_PATHS = {
     REGISTER: `${BASE_URL}/api/auth/register`,
     LOGIN: `${BASE_URL}/api/auth/login`,
     GET_PROFILE: `${BASE_URL}/api/auth/profile`,
+    UPDATE_PROFILE: `${BASE_URL}/api/auth/profile`,
+    UPDATE_PASSWORD: `${BASE_URL}/api/auth/update-password`,
   },
   RESUME: {
     CREATE: `${BASE_URL}/api/resume`,

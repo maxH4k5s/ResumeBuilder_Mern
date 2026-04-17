@@ -62,9 +62,28 @@ const UserProvider = ({ children }) => {
     localStorage.removeItem("token");
   };
 
+  // Refresh user data from server (after profile update)
+  const refreshUser = async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
+      setUser(response.data);
+    } catch (error) {
+      console.error("Failed to refresh user", error);
+    }
+  };
+
+  // Direct update from PUT /api/auth/profile response (no extra GET needed)
+  const updateUserProfile = (updatedData) => {
+    setUser((prev) => ({
+      ...prev,
+      name: updatedData.name ?? prev?.name,
+      profileImageUrl: updatedData.profileImageUrl ?? prev?.profileImageUrl,
+    }));
+  };
+
   return (
     <UserContext.Provider
-      value={{ user, token, loading, updateUser, clearUser }}
+      value={{ user, token, loading, updateUser, clearUser, refreshUser, updateUserProfile }}
     >
       {children}
     </UserContext.Provider>

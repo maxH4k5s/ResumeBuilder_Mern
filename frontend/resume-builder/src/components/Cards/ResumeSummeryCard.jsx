@@ -36,24 +36,29 @@ const ResumeSummeryCard = ({ imgUrl, title, lastUpdated, onSelect }) => {
   return (
     <div
       onClick={onSelect}
-      className="h-[300px] flex flex-col items-center justify-between bg-white rounded-lg border border-gray-200 hover:border-purple-300 overflow-hidden cursor-pointer"
-      style={{ backgroundColor: bgColor }}
+      className="group relative h-[340px] flex flex-col justify-between rounded-xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-purple-300 hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer bg-white"
     >
-      <div className="p-4 w-full flex items-center justify-center">
+      <div 
+        className="w-full flex-1 flex items-center justify-center p-5 overflow-hidden relative transition-colors duration-500"
+        style={{ backgroundColor: bgColor !== '#ffffff' ? bgColor : '#f3f4f6' }}
+      >
         {thumbUrl ? (
-          <img src={thumbUrl} alt={title} className="w-[100%] rounded" />
+          <div className="relative w-full h-full flex items-start justify-center overflow-hidden rounded-md shadow-sm border border-black/5 group-hover:scale-105 group-hover:shadow-md transition-all duration-500">
+            <img src={thumbUrl} alt={title} className="w-full object-cover object-top" />
+          </div>
         ) : (
-          <div className="w-full h-[200px] bg-gray-100 flex items-center justify-center">
-            <span className="text-gray-400">No Preview</span>
+          <div className="w-full h-full bg-white/60 rounded-md flex items-center justify-center border border-dashed border-gray-300">
+            <span className="text-gray-400 font-medium tracking-wide text-sm">No Preview</span>
           </div>
         )}
       </div>
-      <div className="w-full bg-white px-4 py-3">
-        <h5 className="text-sm font-medium truncate overflow-hidden whitespace-nowrap">
+
+      <div className="w-full bg-white px-5 py-4 border-t border-gray-100 z-10">
+        <h5 className="text-[15px] font-semibold text-gray-800 truncate group-hover:text-purple-600 transition-colors duration-200">
           {title}
         </h5>
-        <p className="text-xs font-medium text-gray-500 mt-0.5">
-          Last Updated: {lastUpdated}
+        <p className="text-[11px] font-semibold text-gray-400 mt-1 uppercase tracking-wider">
+          {lastUpdated}
         </p>
       </div>
     </div>
