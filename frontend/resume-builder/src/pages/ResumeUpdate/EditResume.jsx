@@ -655,7 +655,7 @@ const EditResume = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto">
+      <div className="container mx-auto ">
         <div className="flex items-center justify-between gap-5 bg-white rounded-lg border border-purple-100 py-3 px-4 mb-4">
           <TitleInput
             title={resumeData.title}
@@ -758,7 +758,7 @@ const EditResume = () => {
         onClose={() => setOpenThemeSelector(false)}
         title="Change Theme"
       >
-        <div className="w-[90vw] h-[80vh]">
+        <div className="w-full">
           <ThemeSelector
             selectedTheme={resumeData?.template}
             setSelectedTheme={(value) => {
@@ -781,7 +781,7 @@ const EditResume = () => {
         actionBtnIcon={<LuDownload className="text-[16px]" />}
         onActionClick={() => reactToPrintFn()}
       >
-        <div className="w-[90vw] h-[80vh]" ref={resumeDownloadRef}>
+        <div className="w-full" ref={resumeDownloadRef}>
           <RenderResume
             templateId={resumeData?.template.theme || ""}
             resumeData={resumeData}
