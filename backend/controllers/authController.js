@@ -1,14 +1,17 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
 
-// Generate jwt Token
 const generateToken = (res, userId) => {
   const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  const isProd = process.env.NODE_ENV === "production";
+  
   res.cookie("jwt", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV !== "development", // Use secure cookies in production
-    sameSite: "strict", // Prevent CSRF attacks
+    secure: isProd, // Must be true for SameSite=None
+    sameSite: isProd ? "none" : "strict", // Cross-site required in production
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 };
@@ -61,20 +64,44 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // create new user
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       profileImageUrl,
+      verificationToken,
     });
 
-    // Return user data with jwt
+    // Send verification email
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const verificationUrl = `${clientUrl}/verify-email/${verificationToken}`;
+    
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Verify Your Email - Resume Builder",
+        html: `
+          <h3>Welcome to Resume Builder!</h3>
+          <p>Please verify your email address by clicking the link below:</p>
+          <a href="${verificationUrl}" target="_blank">Verify Email</a>
+          <p>If you did not request this, please ignore this email.</p>
+        `,
+      });
+    } catch (emailError) {
+      console.error("Verification email failed:", emailError);
+      // We still return success but maybe user will have to request a new link later
+    }
+
+    // Return user data with jwt (user can login but needs to verify)
     generateToken(res, user._id);
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       profileImageUrl: user.profileImageUrl,
+      isVerified: user.isVerified,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
@@ -110,6 +137,10 @@ const loginUser = async (req, res) => {
       return res.status(403).json({ message: "Your account has been deactivated. Please contact support to reactivate it." });
     }
 
+    if (!user.isVerified) {
+      return res.status(403).json({ message: "Please verify your email address before logging in." });
+    }
+
     // Compare Password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -123,6 +154,7 @@ const loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       profileImageUrl: user.profileImageUrl,
+      isVerified: user.isVerified,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
@@ -133,8 +165,11 @@ const loginUser = async (req, res) => {
 // @route POST /api/auth/logout
 // @access Public
 const logoutUser = (req, res) => {
+  const isProd = process.env.NODE_ENV === "production";
   res.cookie("jwt", "", {
     httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "strict",
     expires: new Date(0),
   });
   res.status(200).json({ message: "Logged out successfully" });
@@ -154,14 +189,124 @@ const deactivateAccount = async (req, res) => {
     await user.save();
 
     // Clear the cookie to log the user out immediately
+    const isProd = process.env.NODE_ENV === "production";
     res.cookie("jwt", "", {
       httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "strict",
       expires: new Date(0),
     });
 
     res.json({ message: "Account successfully deactivated." });
   } catch (error) {
     res.status(500).json({ message: "Failed to deactivate account", error: error.message });
+  }
+};
+
+// @desc Verify User Email
+// @route GET /api/auth/verify-email/:token
+// @access Public
+const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({ verificationToken: token });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired verification token." });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
+
+    res.status(200).json({ message: "Email successfully verified. You can now log in." });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// @desc Forgot Password
+// @route POST /api/auth/forgot-password
+// @access Public
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "No account with that email address exists." });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Send email
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Password Reset Request - Resume Builder",
+        html: `
+          <h3>Password Reset Request</h3>
+          <p>You requested a password reset. Click the link below to set a new password:</p>
+          <a href="${resetUrl}" target="_blank">Reset Password</a>
+          <p>This link is valid for 1 hour.</p>
+          <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
+        `,
+      });
+      res.status(200).json({ message: "Password reset email sent." });
+    } catch (emailError) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+      console.error("Reset email failed:", emailError);
+      return res.status(500).json({ message: "Email could not be sent." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// @desc Reset Password
+// @route POST /api/auth/reset-password/:token
+// @access Public
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long." });
+    }
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Password reset token is invalid or has expired." });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    
+    // Clear reset tokens
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: "Password has been successfully reset. You can now log in." });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -263,6 +408,9 @@ module.exports = {
   loginUser,
   logoutUser,
   deactivateAccount,
+  verifyEmail,
+  forgotPassword,
+  resetPassword,
   getUserProfile,
   updateProfile,
   updatePassword,

@@ -7,6 +7,10 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     profileImageUrl: { type: String, default: null },
     isDeactivated: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false },
+    verificationToken: { type: String },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
   },
   { timestamps: true }
 );

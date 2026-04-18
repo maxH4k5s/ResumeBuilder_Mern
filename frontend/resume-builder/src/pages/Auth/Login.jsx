@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Input from "../../components/inputs/Input";
 import { validateEmail } from "../utils/helper";
 import { UserContext } from "../../context/userContext";
@@ -81,6 +81,15 @@ const Login = ({ setCurrentPage }) => {
           placeholder="min 8 characters"
           type="password"
         />
+
+        <div className="flex justify-end mb-4">
+          <Link
+            to="/forgot-password"
+            className="text-xs font-medium text-primary hover:underline"
+          >
+            Forgot Password?
+          </Link>
+        </div>
 
         {error && <p className="text-red-500 text-xs pb-2.5">{error}</p>}
 

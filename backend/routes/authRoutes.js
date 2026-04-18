@@ -4,6 +4,9 @@ const {
   loginUser,
   logoutUser,
   deactivateAccount,
+  verifyEmail,
+  forgotPassword,
+  resetPassword,
   getUserProfile,
   updateProfile,
   updatePassword,
@@ -32,6 +35,9 @@ router.post("/register", registerUser);
 router.post("/login", loginLimiter, loginUser);
 router.post("/logout", logoutUser);
 router.delete("/deactivate", protect, deactivateAccount);
+router.get("/verify-email/:token", verifyEmail);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateProfile); // Update name + photo
 router.put("/update-password", protect, updatePassword); // Change password

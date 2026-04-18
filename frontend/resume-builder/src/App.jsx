@@ -7,6 +7,11 @@ import EditResume from "./pages/ResumeUpdate/EditResume";
 import ProfileSettings from "./pages/ProfileSettings/ProfileSettings";
 import UserProvider from "./context/userContext";
 
+// Auth Pages
+import ForgotPassword from "./pages/Auth/ForgotPassword";
+import ResetPassword from "./pages/Auth/ResetPassword";
+import VerifyEmail from "./pages/Auth/VerifyEmail";
+
 const App = () => {
   return (
     <UserProvider>
@@ -14,6 +19,9 @@ const App = () => {
         <Router>
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/verify-email/:token" element={<VerifyEmail />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/resume/:resumeId" element={<EditResume />} />
             <Route path="/profile-settings" element={<ProfileSettings />} />

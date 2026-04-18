@@ -23,7 +23,11 @@ app.set("trust proxy", 1); // Trust the first proxy (e.g., Render, Vercel, Nginx
 // CORS config
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://resume-builder-mern-tan.vercel.app",
+      process.env.CLIENT_URL,
+    ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

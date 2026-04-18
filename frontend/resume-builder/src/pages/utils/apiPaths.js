@@ -8,6 +8,9 @@ export const API_PATHS = {
     UPDATE_PROFILE: `${BASE_URL}/api/auth/profile`,
     UPDATE_PASSWORD: `${BASE_URL}/api/auth/update-password`,
     DEACTIVATE_ACCOUNT: `${BASE_URL}/api/auth/deactivate`,
+    VERIFY_EMAIL: (token) => `${BASE_URL}/api/auth/verify-email/${token}`,
+    FORGOT_PASSWORD: `${BASE_URL}/api/auth/forgot-password`,
+    RESET_PASSWORD: (token) => `${BASE_URL}/api/auth/reset-password/${token}`,
   },
   RESUME: {
     CREATE: `${BASE_URL}/api/resume`,
