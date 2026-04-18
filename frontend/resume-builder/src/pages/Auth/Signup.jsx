@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import Input from "../../components/inputs/Input";
-// import { useNavigate } from "react-router-dom"; "
+import toast from "react-hot-toast";
 import ProfilePhotoSelector from "../../components/inputs/ProfilePhotoSelector";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
@@ -60,6 +60,7 @@ const Signup = ({ setCurrentPage }) => {
       });
 
       if (response.data && response.data._id) {
+        toast.success("Account created! Please check your email for a verification link.");
         updateUser(response.data);
         setCurrentPage("login");
       }

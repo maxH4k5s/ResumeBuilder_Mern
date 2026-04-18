@@ -38,9 +38,14 @@ app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res, filePath) => {
-      const clientUrl = process.env.CLIENT_URL;
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "https://resume-builder-mern-tan.vercel.app",
+        process.env.CLIENT_URL,
+      ].filter(Boolean);
+
       const origin = res.req.headers.origin;
-      if (origin === clientUrl || !clientUrl || clientUrl === "*") {
+      if (!origin || allowedOrigins.includes(origin)) {
         res.setHeader("Access-Control-Allow-Origin", origin || "*");
         res.setHeader("Access-Control-Allow-Methods", "GET");
         res.setHeader("Access-Control-Allow-Headers", "Content-Type");
