@@ -655,7 +655,7 @@ const EditResume = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto ">
+      <div className="container mx-auto">
         <div className="flex items-center justify-between gap-5 bg-white rounded-lg border border-purple-100 py-3 px-4 mb-4">
           <TitleInput
             title={resumeData.title}
@@ -757,6 +757,7 @@ const EditResume = () => {
         isOpen={openThemeSelector}
         onClose={() => setOpenThemeSelector(false)}
         title="Change Theme"
+        customWidth="w-[90%] max-w-5xl lg:max-w-6xl"
       >
         <div className="w-full">
           <ThemeSelector
@@ -780,13 +781,17 @@ const EditResume = () => {
         actionBtnText="Download"
         actionBtnIcon={<LuDownload className="text-[16px]" />}
         onActionClick={() => reactToPrintFn()}
+        customWidth="w-[90%] max-w-4xl"
       >
-        <div className="w-full" ref={resumeDownloadRef}>
-          <RenderResume
-            templateId={resumeData?.template.theme || ""}
-            resumeData={resumeData}
-            colorPalette={resumeData?.template?.colorPalette || []}
-          />
+        <div className="w-full overflow-x-auto overflow-y-auto custom-scrollbar flex justify-center">
+          <div ref={resumeDownloadRef}>
+            <RenderResume
+              templateId={resumeData?.template.theme || ""}
+              resumeData={resumeData}
+              colorPalette={resumeData?.template?.colorPalette || []}
+              containerWidth={800}
+            />
+          </div>
         </div>
       </Modal>
     </DashboardLayout>

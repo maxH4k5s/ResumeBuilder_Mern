@@ -11,13 +11,14 @@ const Modal = ({
   actionBtnIcon = null,
   actionBtnText,
   onActionClick,
+  customWidth,
 }) => {
   if (!isOpen) return null;
 
   const modalContent = (
     <div className="fixed inset-0 z-[100] flex justify-center items-center w-full h-full bg-black/40">
       <div
-        className={`relative flex flex-col bg-white shadow-lg rounded-lg overflow-hidden w-[90%] max-w-md md:max-w-lg lg:max-w-xl mx-auto`}
+        className={`relative flex flex-col bg-white shadow-lg rounded-lg overflow-hidden ${customWidth || "w-[90%] max-w-md md:max-w-lg lg:max-w-xl"} mx-auto max-h-[95vh]`}
       >
         {!hideHeader && (
           <div className="flex items-center justify-between p-4 border-b border-gray-200">

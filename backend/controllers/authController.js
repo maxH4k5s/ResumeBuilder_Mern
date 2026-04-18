@@ -3,8 +3,14 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 // Generate jwt Token
-const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+const generateToken = (res, userId) => {
+  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  res.cookie("jwt", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== "development", // Use secure cookies in production
+    sameSite: "strict", // Prevent CSRF attacks
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
 };
 
 // Basic email validator
@@ -37,6 +43,14 @@ const registerUser = async (req, res) => {
         .json({ message: "Password must be at least 8 characters long." });
     }
 
+    // Password complexity check
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+      });
+    }
+
     // check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -55,12 +69,12 @@ const registerUser = async (req, res) => {
     });
 
     // Return user data with jwt
+    generateToken(res, user._id);
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       profileImageUrl: user.profileImageUrl,
-      token: generateToken(user._id),
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
@@ -92,6 +106,10 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password." });
     }
 
+    if (user.isDeactivated) {
+      return res.status(403).json({ message: "Your account has been deactivated. Please contact support to reactivate it." });
+    }
+
     // Compare Password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -99,15 +117,51 @@ const loginUser = async (req, res) => {
     }
 
     // Return User data with jwt
+    generateToken(res, user._id);
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       profileImageUrl: user.profileImageUrl,
-      token: generateToken(user._id),
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// @desc Logout user
+// @route POST /api/auth/logout
+// @access Public
+const logoutUser = (req, res) => {
+  res.cookie("jwt", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({ message: "Logged out successfully" });
+};
+
+// @desc Deactivate user account
+// @route DELETE /api/auth/deactivate
+// @access Private
+const deactivateAccount = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    user.isDeactivated = true;
+    await user.save();
+
+    // Clear the cookie to log the user out immediately
+    res.cookie("jwt", "", {
+      httpOnly: true,
+      expires: new Date(0),
+    });
+
+    res.json({ message: "Account successfully deactivated." });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to deactivate account", error: error.message });
   }
 };
 
@@ -207,6 +261,8 @@ const updatePassword = async (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
+  logoutUser,
+  deactivateAccount,
   getUserProfile,
   updateProfile,
   updatePassword,

@@ -43,10 +43,7 @@ const Login = ({ setCurrentPage }) => {
         password,
       });
 
-      const { token } = response.data;
-
-      if (token) {
-        localStorage.setItem("token", token);
+      if (response.data && response.data._id) {
         updateUser(response.data);
         navigate("/dashboard");
       }

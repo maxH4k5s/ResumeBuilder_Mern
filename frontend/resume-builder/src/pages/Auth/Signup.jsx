@@ -59,10 +59,7 @@ const Signup = ({ setCurrentPage }) => {
         profileImageUrl,
       });
 
-      const { token } = response.data;
-
-      if (token) {
-        localStorage.setItem("token", token);
+      if (response.data && response.data._id) {
         updateUser(response.data);
         setCurrentPage("login");
       }

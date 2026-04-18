@@ -12,15 +12,17 @@ import {
   LuSave,
   LuUser,
 } from "react-icons/lu";
+import { TbAlertTriangle } from "react-icons/tb";
 import toast from "react-hot-toast";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
+import Modal from "../../components/Modal";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
 import uploadImage from "../utils/uploadImg";
 
 const ProfileSettings = () => {
-  const { user, updateUserProfile } = useContext(UserContext);
+  const { user, updateUserProfile, logoutUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   // ─── Profile form state ────────────────────────────────────
@@ -38,6 +40,10 @@ const ProfileSettings = () => {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // ─── Deactivate account state ──────────────────────────────
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const [deactivateLoading, setDeactivateLoading] = useState(false);
 
   // Fetch fresh data from server every time this page opens — reliable, no context dependency
   useEffect(() => {
@@ -140,6 +146,20 @@ const ProfileSettings = () => {
       toast.error(err?.response?.data?.message || "Failed to update password");
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleDeactivateAccount = async () => {
+    try {
+      setDeactivateLoading(true);
+      await axiosInstance.delete(API_PATHS.AUTH.DEACTIVATE_ACCOUNT);
+      toast.success("Account deactivated successfully.");
+      logoutUser(); // Logs out and redirects
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to deactivate account");
+    } finally {
+      setDeactivateLoading(false);
+      setShowDeactivateModal(false);
     }
   };
 
@@ -374,7 +394,69 @@ const ProfileSettings = () => {
           </button>
         </form>
 
+        {/* ── Danger Zone Card ────────────────────────────── */}
+        <div className="bg-red-50/50 rounded-2xl border border-red-100 shadow-sm p-6 mt-5">
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+              <TbAlertTriangle className="text-red-600" />
+            </div>
+            <h2 className="text-base font-semibold text-red-800">Danger Zone</h2>
+          </div>
+          <p className="text-sm text-red-600/80 mb-6 pl-10">
+            Deactivating your account will immediately log you out. Your resumes and profile will be disabled. You will need to contact an administrator to reactivate your account.
+          </p>
+          <div className="pl-10">
+            <button
+              onClick={() => setShowDeactivateModal(true)}
+              className="px-5 py-2.5 rounded-xl bg-white border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 hover:border-red-300 transition-colors shadow-sm"
+            >
+              Deactivate Account
+            </button>
+          </div>
+        </div>
+
       </div>
+
+      {/* ── Deactivate Confirmation Modal ───────────────── */}
+      <Modal
+        isOpen={showDeactivateModal}
+        onClose={() => !deactivateLoading && setShowDeactivateModal(false)}
+        title="Confirm Deactivation"
+      >
+        <div className="flex flex-col items-center justify-center p-4">
+          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4 text-red-500">
+            <TbAlertTriangle className="text-3xl" />
+          </div>
+          <h4 className="text-lg font-semibold text-gray-800 mb-2 text-center">
+            Deactivate your account?
+          </h4>
+          <p className="text-sm text-gray-500 text-center mb-6">
+            You will be logged out immediately and will not be able to log back in. Your published resumes will also be disabled. This action requires an administrator to reverse.
+          </p>
+
+          <div className="flex items-center gap-4 w-full">
+            <button
+              className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-lg transition-colors"
+              onClick={() => setShowDeactivateModal(false)}
+              disabled={deactivateLoading}
+            >
+              Cancel
+            </button>
+            <button
+              className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              onClick={handleDeactivateAccount}
+              disabled={deactivateLoading}
+            >
+              {deactivateLoading ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                "Yes, Deactivate"
+              )}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
     </DashboardLayout>
   );
 };

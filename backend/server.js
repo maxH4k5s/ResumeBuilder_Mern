@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
@@ -15,14 +16,17 @@ connectDB();
 app.use(express.json());
 // Routes ko express.urlencoded bhi add karein
 app.use(express.urlencoded({ extended: true }));
+// Parse cookies
+app.use(cookieParser());
 
-app.set("trust proxy", true);
+app.set("trust proxy", 1); // Trust the first proxy (e.g., Render, Vercel, Nginx)
 // CORS config
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   }),
 );
 

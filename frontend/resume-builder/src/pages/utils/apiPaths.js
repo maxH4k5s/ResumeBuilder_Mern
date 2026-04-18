@@ -7,6 +7,7 @@ export const API_PATHS = {
     GET_PROFILE: `${BASE_URL}/api/auth/profile`,
     UPDATE_PROFILE: `${BASE_URL}/api/auth/profile`,
     UPDATE_PASSWORD: `${BASE_URL}/api/auth/update-password`,
+    DEACTIVATE_ACCOUNT: `${BASE_URL}/api/auth/deactivate`,
   },
   RESUME: {
     CREATE: `${BASE_URL}/api/resume`,

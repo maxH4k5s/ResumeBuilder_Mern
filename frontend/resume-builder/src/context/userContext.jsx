@@ -6,44 +6,27 @@ export const UserContext = createContext();
 
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
-  // Attach token to axios headers whenever it changes
-  useEffect(() => {
-    if (token) {
-      axiosInstance.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${token}`;
-    } else {
-      delete axiosInstance.defaults.headers.common["Authorization"];
-    }
-  }, [token]);
-
-  // Fetch user profile on mount or when token updates
+  // Fetch user profile on mount
   useEffect(() => {
     const fetchUser = async () => {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
       setLoading(true);
       try {
         const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
         setUser(response.data);
       } catch (error) {
-        console.error("Failed to fetch user profile", error);
-        clearUser();
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
     fetchUser();
-  }, [token]);
+  }, []);
 
   // Called after successful login (handles backend response format)
   const updateUser = (data) => {
-    // Handle backend response format: { _id, name, email, profileImageUrl, token }
+    // Handle backend response format: { _id, name, email, profileImageUrl }
     const userData = {
       _id: data._id,
       name: data.name,
@@ -51,15 +34,23 @@ const UserProvider = ({ children }) => {
       profileImageUrl: data.profileImageUrl,
     };
     setUser(userData);
-    setToken(data.token);
-    localStorage.setItem("token", data.token);
+  };
+
+  // Logout user
+  const logoutUser = async () => {
+    try {
+      await axiosInstance.post("/api/auth/logout");
+    } catch (error) {
+      console.error("Failed to logout on server", error);
+    } finally {
+      clearUser();
+      window.location.href = "/";
+    }
   };
 
   // Clear user data on logout or error
   const clearUser = () => {
     setUser(null);
-    setToken(null);
-    localStorage.removeItem("token");
   };
 
   // Refresh user data from server (after profile update)
@@ -83,7 +74,7 @@ const UserProvider = ({ children }) => {
 
   return (
     <UserContext.Provider
-      value={{ user, token, loading, updateUser, clearUser, refreshUser, updateUserProfile }}
+      value={{ user, loading, updateUser, logoutUser, clearUser, refreshUser, updateUserProfile }}
     >
       {children}
     </UserContext.Provider>

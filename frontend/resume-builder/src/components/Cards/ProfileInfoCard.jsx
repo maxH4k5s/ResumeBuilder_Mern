@@ -5,14 +5,12 @@ import { LuSettings, LuLogOut, LuCircleAlert } from "react-icons/lu";
 import Modal from "../Modal";
 
 const ProfileInfoCard = () => {
-  const { user, clearUser } = useContext(UserContext);
+  const { user, logoutUser } = useContext(UserContext);
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
-    localStorage.clear();
-    clearUser();
-    navigate("/");
+    logoutUser();
   };
 
   return (

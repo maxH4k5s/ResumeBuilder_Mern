@@ -26,11 +26,19 @@ const ThemeSelector = ({
   onClose,
 }) => {
   const resumeRef = useRef(null);
-  const [baseWidth, setBaseWidth] = useState(800);
+  const [baseWidth, setBaseWidth] = useState(1000);
   const [tabValue, setTabValue] = useState("Templates");
-  const [selectedColorPalette, setSelectedColorPalette] = useState({
-    colors: selectedTheme?.colorPalette,
-    index: selectedTheme?.theme,
+  const [selectedColorPalette, setSelectedColorPalette] = useState(() => {
+    let initialIndex = null;
+    if (selectedTheme?.colorPalette?.length > 0) {
+      initialIndex = colorPalettesArray.findIndex(
+        (p) => JSON.stringify(p.colors) === JSON.stringify(selectedTheme.colorPalette)
+      );
+    }
+    return {
+      colors: selectedTheme?.colorPalette || [],
+      index: initialIndex !== -1 ? initialIndex : null,
+    };
   });
 
   const [selectedTemplate, setSelectedTemplate] = useState(() => {
@@ -68,7 +76,7 @@ const ThemeSelector = ({
   }, [updateBaseWidth]);
 
   return (
-    <div className="container mx-auto px-2 md:px-0">
+    <div className="w-full mx-auto px-2 md:px-0">
       <div className="flex items-center justify-between mb-5 mt-2">
         <Tabs tabs={TAB_DATA} activeTab={tabValue} setActiveTab={setTabValue} />
         <button
@@ -84,7 +92,7 @@ const ThemeSelector = ({
       <div className="grid grid-cols-12 gap-5">
         {/* Left Column: Templates or Color Palettes */}
         <div className="col-span-12 md:col-span-5 bg-white">
-          <div className="grid grid-cols-2 gap-5 max-h-[80vh] overflow-scroll custom-scrollbar md:pr-5">
+          <div className="grid grid-cols-2 gap-5 max-h-[80vh] overflow-none md:pr-5">
             {tabValue === "Templates" &&
               resumeTemplates.map((template, index) => (
                 <TemplateCard
@@ -112,7 +120,7 @@ const ThemeSelector = ({
 
         {/* Right Column: Resume Preview */}
         <div
-          className="col-span-12 md:col-span-7 bg-white -mt-3 border border-gray-200 rounded-xl shadow-sm"
+          className="col-span-12 md:col-span-7 bg-white -mt-3 border border-gray-200 rounded-xl shadow-sm max-h-[80vh] overflow-x-hidden overflow-y-auto custom-scrollbar"
           ref={resumeRef}
         >
           <RenderResume
@@ -133,9 +141,8 @@ export default ThemeSelector;
 const ColorPalette = ({ name, colors, isSelected, onSelect }) => {
   return (
     <div
-      className={`rounded-lg overflow-hidden border-2 cursor-pointer ${
-        isSelected ? "border-purple-500" : "border-gray-200"
-      }`}
+      className={`rounded-lg overflow-hidden border-2 cursor-pointer ${isSelected ? "border-purple-500" : "border-gray-200"
+        }`}
       onClick={onSelect}
     >
       <div className="flex h-20">

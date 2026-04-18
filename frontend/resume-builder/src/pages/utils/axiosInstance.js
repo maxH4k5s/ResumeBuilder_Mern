@@ -20,15 +20,12 @@ const axiosInstance = axios.create({
     // For JSON requests it's set per-call; for FormData, Axios sets it automatically.
     Accept: "application/json",
   },
+  withCredentials: true,
 });
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    const accessToken = localStorage.getItem("token");
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
 
     // Only set Content-Type for non-FormData requests
     // FormData lets Axios auto-set "multipart/form-data; boundary=..." correctly
@@ -47,8 +44,8 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response) {
       if (error.response.status === 401) {
-        // If the error is from the login endpoint, let the component handle it (so it can show the error message)
-        if (!error.config || !error.config.url.includes("login")) {
+        // If the error is from login, logout, or profile endpoint, let the component handle it
+        if (!error.config || (!error.config.url.includes("login") && !error.config.url.includes("logout") && !error.config.url.includes("profile"))) {
           window.location.href = "/";
         }
       } else if (error.response.status === 500) {

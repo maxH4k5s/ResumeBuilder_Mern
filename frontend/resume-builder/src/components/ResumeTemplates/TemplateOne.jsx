@@ -51,7 +51,7 @@ const TemplateOne = ({ resumeData, colorPalette, containerWidth }) => {
       style={{
         transform: containerWidth > 0 ? `scale(${scale})` : "none",
         transformOrigin: "top left",
-        width: containerWidth > 0 ? `${baseWidth}` : "auto", //keep the origin size so scaling works perfectly
+        width: containerWidth > 0 ? `${baseWidth}px` : "auto", //keep the origin size so scaling works perfectly
         height: "auto",
       }}
     >
