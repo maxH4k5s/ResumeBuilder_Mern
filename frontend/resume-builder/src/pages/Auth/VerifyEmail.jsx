@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
+import toast from "react-hot-toast";
 
 const VerifyEmail = () => {
   const { token } = useParams();
   const [status, setStatus] = useState("verifying"); // 'verifying', 'success', 'error'
   const [message, setMessage] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
 
   useEffect(() => {
     const verifyToken = async () => {
@@ -17,10 +20,30 @@ const VerifyEmail = () => {
       } catch (error) {
         setStatus("error");
         setMessage(error.response?.data?.message || "Invalid or expired verification token.");
+        // Try to get email from localStorage if verification failed
+        const email = localStorage.getItem("unverifiedEmail");
+        if (email) setUserEmail(email);
       }
     };
     verifyToken();
   }, [token]);
+
+  const handleResendEmail = async () => {
+    if (!userEmail) {
+      toast.error("Email address is required.");
+      return;
+    }
+
+    setResendLoading(true);
+    try {
+      await axiosInstance.post(API_PATHS.AUTH.RESEND_VERIFICATION_EMAIL, { email: userEmail });
+      toast.success("Verification email sent! Check your inbox.");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to resend email.");
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -53,8 +76,27 @@ const VerifyEmail = () => {
               !
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">Verification Failed</h3>
-            <p className="text-sm text-gray-500 mb-8">{message}</p>
-            <Link to="/" className="w-full btn-primary block text-center py-2.5">
+            <p className="text-sm text-gray-500 mb-6">{message}</p>
+            
+            {!userEmail && (
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4 text-sm"
+              />
+            )}
+            
+            <button
+              onClick={handleResendEmail}
+              disabled={resendLoading || !userEmail}
+              className="w-full btn-primary py-2.5 mb-3"
+            >
+              {resendLoading ? <span className="spinner"></span> : "Resend Verification Email"}
+            </button>
+            
+            <Link to="/" className="w-full btn-secondary block text-center py-2.5">
               Go to Login
             </Link>
           </div>

@@ -72,12 +72,14 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
       profileImageUrl,
       verificationToken,
+      verificationTokenExpires: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
     });
 
     // Send verification email
     const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
     const verificationUrl = `${clientUrl}/verify-email/${verificationToken}`;
     
+    let emailSent = false;
     try {
       await sendEmail({
         to: user.email,
@@ -86,22 +88,38 @@ const registerUser = async (req, res) => {
           <h3>Welcome to Resume Builder!</h3>
           <p>Please verify your email address by clicking the link below:</p>
           <a href="${verificationUrl}" target="_blank">Verify Email</a>
+          <p>This link is valid for 24 hours.</p>
           <p>If you did not request this, please ignore this email.</p>
         `,
       });
+      emailSent = true;
     } catch (emailError) {
       console.error("Verification email failed:", emailError);
-      // We still return success but maybe user will have to request a new link later
+      // User is created, but email failed to send
+      // User can request resend later using resend-verification-email endpoint
     }
 
     // Return user data with jwt (user can login but needs to verify)
     generateToken(res, user._id);
-    res.status(201).json({
+    const responseData = {
       _id: user._id,
       name: user.name,
       email: user.email,
       profileImageUrl: user.profileImageUrl,
       isVerified: user.isVerified,
+    };
+
+    // Add warning if email failed to send
+    if (!emailSent) {
+      return res.status(201).json({
+        ...responseData,
+        warning: "Account created successfully, but verification email could not be sent. Please check your email or request a new verification link.",
+      });
+    }
+
+    res.status(201).json({
+      ...responseData,
+      message: "Account created successfully. Please verify your email address.",
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
@@ -210,7 +228,10 @@ const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
 
-    const user = await User.findOne({ verificationToken: token });
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: Date.now() },
+    });
 
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired verification token." });
@@ -218,6 +239,7 @@ const verifyEmail = async (req, res) => {
 
     user.isVerified = true;
     user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
     await user.save();
 
     res.status(200).json({ message: "Email successfully verified. You can now log in." });
@@ -284,6 +306,14 @@ const resetPassword = async (req, res) => {
 
     if (!password || password.length < 8) {
       return res.status(400).json({ message: "Password must be at least 8 characters long." });
+    }
+
+    // Password complexity check (same as registerUser)
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+      });
     }
 
     const user = await User.findOne({
@@ -381,6 +411,14 @@ const updatePassword = async (req, res) => {
         .json({ message: "New password must be at least 8 characters." });
     }
 
+    // Password complexity check (same as registerUser)
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+      });
+    }
+
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found." });
@@ -403,6 +441,59 @@ const updatePassword = async (req, res) => {
   }
 };
 
+// @desc Resend Verification Email
+// @route POST /api/auth/resend-verification-email
+// @access Public
+const resendVerificationEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || !validateEmail(email)) {
+      return res.status(400).json({ message: "Please provide a valid email address." });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "No account with that email address exists." });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Email is already verified." });
+    }
+
+    // Generate new verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    await user.save();
+
+    // Send verification email
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const verificationUrl = `${clientUrl}/verify-email/${verificationToken}`;
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Verify Your Email - Resume Builder",
+        html: `
+          <h3>Welcome to Resume Builder!</h3>
+          <p>Please verify your email address by clicking the link below:</p>
+          <a href="${verificationUrl}" target="_blank">Verify Email</a>
+          <p>This link is valid for 24 hours.</p>
+          <p>If you did not request this, please ignore this email.</p>
+        `,
+      });
+      res.status(200).json({ message: "Verification email has been sent." });
+    } catch (emailError) {
+      console.error("Verification email failed:", emailError);
+      return res.status(500).json({ message: "Email could not be sent." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -414,4 +505,5 @@ module.exports = {
   getUserProfile,
   updateProfile,
   updatePassword,
+  resendVerificationEmail,
 };

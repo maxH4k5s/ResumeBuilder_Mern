@@ -60,8 +60,15 @@ const Signup = ({ setCurrentPage }) => {
       });
 
       if (response.data && response.data._id) {
-        toast.success("Account created! Please check your email for a verification link.");
+        // Check if there's a warning about email not being sent
+        if (response.data.warning) {
+          toast.error(response.data.warning);
+        } else {
+          toast.success("Account created! Please check your email for a verification link.");
+        }
         updateUser(response.data);
+        // Store email for resend functionality
+        localStorage.setItem("unverifiedEmail", email);
         setCurrentPage("login");
       }
     } catch (error) {

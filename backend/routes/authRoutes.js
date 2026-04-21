@@ -10,6 +10,7 @@ const {
   getUserProfile,
   updateProfile,
   updatePassword,
+  resendVerificationEmail,
 } = require("../controllers/authController");
 const { protect } = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/uploadMiddleware");
@@ -36,6 +37,7 @@ router.post("/login", loginLimiter, loginUser);
 router.post("/logout", logoutUser);
 router.delete("/deactivate", protect, deactivateAccount);
 router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification-email", resendVerificationEmail);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 router.get("/profile", protect, getUserProfile);

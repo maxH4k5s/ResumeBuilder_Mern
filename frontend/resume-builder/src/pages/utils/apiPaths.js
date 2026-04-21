@@ -9,6 +9,7 @@ export const API_PATHS = {
     UPDATE_PASSWORD: `${BASE_URL}/api/auth/update-password`,
     DEACTIVATE_ACCOUNT: `${BASE_URL}/api/auth/deactivate`,
     VERIFY_EMAIL: (token) => `${BASE_URL}/api/auth/verify-email/${token}`,
+    RESEND_VERIFICATION_EMAIL: `${BASE_URL}/api/auth/resend-verification-email`,
     FORGOT_PASSWORD: `${BASE_URL}/api/auth/forgot-password`,
     RESET_PASSWORD: (token) => `${BASE_URL}/api/auth/reset-password/${token}`,
   },
