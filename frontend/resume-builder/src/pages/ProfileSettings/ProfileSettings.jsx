@@ -4,10 +4,7 @@ import {
   LuArrowLeft,
   LuCamera,
   LuCheck,
-  LuEye,
-  LuEyeOff,
   LuKeyRound,
-  LuLock,
   LuMail,
   LuSave,
   LuUser,
@@ -16,6 +13,7 @@ import { TbAlertTriangle } from "react-icons/tb";
 import toast from "react-hot-toast";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import Modal from "../../components/Modal";
+import Input from "../../components/inputs/Input";
 import { UserContext } from "../../context/userContext";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
@@ -37,9 +35,6 @@ const ProfileSettings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   // ─── Deactivate account state ──────────────────────────────
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
@@ -165,30 +160,7 @@ const ProfileSettings = () => {
 
   // ─── Sub-components ────────────────────────────────────────
 
-  const PasswordField = ({ label, value, onChange, show, onToggle, placeholder }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-        {label}
-      </label>
-      <div className="relative">
-        <LuLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-        <input
-          type={show ? "text" : "password"}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-sm text-gray-800 transition"
-        />
-        <button
-          type="button"
-          onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors"
-        >
-          {show ? <LuEyeOff className="text-base" /> : <LuEye className="text-base" />}
-        </button>
-      </div>
-    </div>
-  );
+
 
   // ─── Render ────────────────────────────────────────────────
 
@@ -337,28 +309,25 @@ const ProfileSettings = () => {
           </div>
 
           <div className="space-y-4 mb-6">
-            <PasswordField
+            <Input
+              type="password"
               label="Current Password"
               value={currentPassword}
-              onChange={setCurrentPassword}
-              show={showCurrent}
-              onToggle={() => setShowCurrent((p) => !p)}
+              onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Enter your current password"
             />
-            <PasswordField
+            <Input
+              type="password"
               label="New Password"
               value={newPassword}
-              onChange={setNewPassword}
-              show={showNew}
-              onToggle={() => setShowNew((p) => !p)}
+              onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Minimum 8 characters"
             />
-            <PasswordField
+            <Input
+              type="password"
               label="Confirm New Password"
               value={confirmPassword}
-              onChange={setConfirmPassword}
-              show={showConfirm}
-              onToggle={() => setShowConfirm((p) => !p)}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Repeat new password"
             />
           </div>

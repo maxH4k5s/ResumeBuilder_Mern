@@ -65,6 +65,8 @@ const registerUser = async (req, res) => {
 
     // create new user
     const verificationToken = crypto.randomBytes(32).toString("hex");
+    console.log("Generated verification token:", verificationToken);
+    console.log("Token length:", verificationToken.length);
 
     const user = await User.create({
       name,
@@ -74,6 +76,8 @@ const registerUser = async (req, res) => {
       verificationToken,
       verificationTokenExpires: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
     });
+
+    console.log("User created with token expires:", user.verificationTokenExpires);
 
     // Send verification email
     const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
@@ -227,11 +231,20 @@ const deactivateAccount = async (req, res) => {
 const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
+    console.log("Verification token received:", token);
+    console.log("Token length:", token.length);
 
     const user = await User.findOne({
       verificationToken: token,
       verificationTokenExpires: { $gt: Date.now() },
     });
+
+    console.log("User found:", !!user);
+    if (user) {
+      console.log("User email:", user.email);
+      console.log("Token expires:", user.verificationTokenExpires);
+      console.log("Current time:", new Date());
+    }
 
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired verification token." });
