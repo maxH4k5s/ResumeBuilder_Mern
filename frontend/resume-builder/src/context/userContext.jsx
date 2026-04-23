@@ -24,14 +24,15 @@ const UserProvider = ({ children }) => {
     fetchUser();
   }, []);
 
-  // Called after successful login (handles backend response format)
+
   const updateUser = (data) => {
-    // Handle backend response format: { _id, name, email, profileImageUrl }
+
     const userData = {
       _id: data._id,
       name: data.name,
       email: data.email,
       profileImageUrl: data.profileImageUrl,
+      isVerified: data.isVerified,
     };
     setUser(userData);
   };
