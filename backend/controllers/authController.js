@@ -5,9 +5,11 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 
 const generateToken = (res, userId) => {
-  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
   const isProd = process.env.NODE_ENV === "production";
-  
+
   res.cookie("jwt", token, {
     httpOnly: true,
     secure: isProd, // Must be true for SameSite=None
@@ -47,10 +49,12 @@ const registerUser = async (req, res) => {
     }
 
     // Password complexity check
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
-        message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        message:
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
       });
     }
 
@@ -77,12 +81,15 @@ const registerUser = async (req, res) => {
       verificationTokenExpires: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
     });
 
-    console.log("User created with token expires:", user.verificationTokenExpires);
+    console.log(
+      "User created with token expires:",
+      user.verificationTokenExpires,
+    );
 
     // Send verification email
     const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
     const verificationUrl = `${clientUrl}/verify-email/${verificationToken}`;
-    
+
     let emailSent = false;
     try {
       await sendEmail({
@@ -99,12 +106,8 @@ const registerUser = async (req, res) => {
       emailSent = true;
     } catch (emailError) {
       console.error("Verification email failed:", emailError);
-      // User is created, but email failed to send
-      // User can request resend later using resend-verification-email endpoint
     }
 
-    // Return user data with jwt (user can login but needs to verify)
-    generateToken(res, user._id);
     const responseData = {
       _id: user._id,
       name: user.name,
@@ -113,17 +116,18 @@ const registerUser = async (req, res) => {
       isVerified: user.isVerified,
     };
 
-    // Add warning if email failed to send
     if (!emailSent) {
       return res.status(201).json({
         ...responseData,
-        warning: "Account created successfully, but verification email could not be sent. Please check your email or request a new verification link.",
+        warning:
+          "Account created successfully, but verification email could not be sent. Please check your email or request a new verification link.",
       });
     }
 
     res.status(201).json({
       ...responseData,
-      message: "Account created successfully. Please verify your email address.",
+      message:
+        "Account created successfully. Please verify your email address.",
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
@@ -156,11 +160,20 @@ const loginUser = async (req, res) => {
     }
 
     if (user.isDeactivated) {
-      return res.status(403).json({ message: "Your account has been deactivated. Please contact support to reactivate it." });
+      return res
+        .status(403)
+        .json({
+          message:
+            "Your account has been deactivated. Please contact support to reactivate it.",
+        });
     }
 
     if (!user.isVerified) {
-      return res.status(403).json({ message: "Please verify your email address before logging in." });
+      return res
+        .status(403)
+        .json({
+          message: "Please verify your email address before logging in.",
+        });
     }
 
     // Compare Password
@@ -210,7 +223,6 @@ const deactivateAccount = async (req, res) => {
     user.isDeactivated = true;
     await user.save();
 
-    // Clear the cookie to log the user out immediately
     const isProd = process.env.NODE_ENV === "production";
     res.cookie("jwt", "", {
       httpOnly: true,
@@ -221,7 +233,9 @@ const deactivateAccount = async (req, res) => {
 
     res.json({ message: "Account successfully deactivated." });
   } catch (error) {
-    res.status(500).json({ message: "Failed to deactivate account", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to deactivate account", error: error.message });
   }
 };
 
@@ -247,7 +261,9 @@ const verifyEmail = async (req, res) => {
     }
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid or expired verification token." });
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired verification token." });
     }
 
     user.isVerified = true;
@@ -255,7 +271,9 @@ const verifyEmail = async (req, res) => {
     user.verificationTokenExpires = undefined;
     await user.save();
 
-    res.status(200).json({ message: "Email successfully verified. You can now log in." });
+    res
+      .status(200)
+      .json({ message: "Email successfully verified. You can now log in." });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -270,7 +288,9 @@ const forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ message: "No account with that email address exists." });
+      return res
+        .status(404)
+        .json({ message: "No account with that email address exists." });
     }
 
     // Generate reset token
@@ -318,14 +338,17 @@ const resetPassword = async (req, res) => {
     const { password } = req.body;
 
     if (!password || password.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters long." });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 8 characters long." });
     }
 
-    // Password complexity check (same as registerUser)
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
-        message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        message:
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
       });
     }
 
@@ -335,19 +358,25 @@ const resetPassword = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ message: "Password reset token is invalid or has expired." });
+      return res
+        .status(400)
+        .json({ message: "Password reset token is invalid or has expired." });
     }
 
     // Hash new password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
-    
+
     // Clear reset tokens
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
 
-    res.status(200).json({ message: "Password has been successfully reset. You can now log in." });
+    res
+      .status(200)
+      .json({
+        message: "Password has been successfully reset. You can now log in.",
+      });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -425,10 +454,12 @@ const updatePassword = async (req, res) => {
     }
 
     // Password complexity check (same as registerUser)
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     if (!passwordRegex.test(newPassword)) {
       return res.status(400).json({
-        message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        message:
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
       });
     }
 
@@ -462,13 +493,17 @@ const resendVerificationEmail = async (req, res) => {
     const { email } = req.body;
 
     if (!email || !validateEmail(email)) {
-      return res.status(400).json({ message: "Please provide a valid email address." });
+      return res
+        .status(400)
+        .json({ message: "Please provide a valid email address." });
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ message: "No account with that email address exists." });
+      return res
+        .status(404)
+        .json({ message: "No account with that email address exists." });
     }
 
     if (user.isVerified) {

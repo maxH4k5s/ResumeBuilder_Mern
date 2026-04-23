@@ -15,7 +15,8 @@ const LandingPage = () => {
   const [currentPage, setCurrentPage] = useState("login");
 
   const handleCTA = () => {
-    if (!user) {
+    if (!user || !user.isVerified) {
+      // Not logged in, OR logged in but not verified — show auth modal
       setOpenAuthModel(true);
     } else {
       navigate("/dashboard");

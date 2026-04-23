@@ -18,7 +18,7 @@ const Signup = ({ setCurrentPage }) => {
 
   const [error, setError] = useState(null);
 
-  const { updateUser } = useContext(UserContext);
+  // Signup does not set user context — user must verify email first
   // const navigate = useNavigate();
 
   const handleSignup = async (e) => {
@@ -66,7 +66,7 @@ const Signup = ({ setCurrentPage }) => {
         } else {
           toast.success("Account created! Please check your email for a verification link.");
         }
-        updateUser(response.data);
+        // DO NOT call updateUser — user must verify email before being logged in
         // Store email for resend functionality
         localStorage.setItem("unverifiedEmail", email);
         setCurrentPage("login");

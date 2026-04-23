@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Modal from "../../components/Modal";
 import ResumeSummeryCard from "../../components/Cards/ResumeSummeryCard";
 import axiosInstance from "../utils/axiosInstance";
@@ -8,12 +8,21 @@ import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { LuCirclePlus } from "react-icons/lu";
 import moment from "moment";
 import CreateResumeForm from "./CreateResumeForm";
+import { UserContext } from "../../context/userContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user, loading } = useContext(UserContext);
 
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [allResumes, setAllResumes] = useState(null);
+
+  // Auth guard: redirect if not logged in or not verified
+  useEffect(() => {
+    if (!loading && (!user || !user.isVerified)) {
+      navigate("/");
+    }
+  }, [user, loading, navigate]);
 
   const fetchAllResumes = async () => {
     try {
